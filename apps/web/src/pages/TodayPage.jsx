@@ -6,7 +6,7 @@ import {
   sumDailyTotals,
   todayIn,
 } from "@fitness/shared";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { DailySummary } from "@/components/nutrition/DailySummary.jsx";
@@ -38,7 +38,30 @@ function DateNav({ date, today, setDate }) {
         <ChevronLeft />
       </Button>
       <div className="text-center">
-        <h1 className="text-xl font-bold">{label}</h1>
+        <h1>
+          {/* A transparent native date input covers the label: tapping opens the
+              phone's date picker; on desktop showPicker() opens the calendar
+              from anywhere on the label, not just the tiny icon. */}
+          <label className="relative inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg px-2 text-xl font-bold hover:bg-muted focus-within:ring-3 focus-within:ring-ring/50">
+            {label}
+            <CalendarDays className="size-4 text-muted-foreground" aria-hidden />
+            <input
+              type="date"
+              required
+              aria-label="Choose a date"
+              value={date}
+              onChange={(e) => e.target.value && setDate(e.target.value)}
+              onClick={(e) => {
+                try {
+                  e.currentTarget.showPicker();
+                } catch {
+                  // Older browsers: the native control still opens on tap.
+                }
+              }}
+              className="absolute inset-0 cursor-pointer opacity-0"
+            />
+          </label>
+        </h1>
         {date !== today && (
           <button
             type="button"
