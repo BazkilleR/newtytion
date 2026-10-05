@@ -9,6 +9,16 @@ exercisesRouter.get("/", async (_req, res) => {
   res.json(await exercisesService.listExercises(res.locals.userId));
 });
 
+// Must be registered before "/:id/..." routes would ever match "performed".
+exercisesRouter.get("/performed", async (_req, res) => {
+  res.json(await exercisesService.listPerformedExercises(res.locals.userId));
+});
+
+exercisesRouter.get("/:id/history", async (req, res) => {
+  const { id } = idParamsSchema.parse(req.params);
+  res.json(await exercisesService.getExerciseHistory(res.locals.userId, id));
+});
+
 exercisesRouter.post("/", async (req, res) => {
   const input = createExerciseInputSchema.parse(req.body);
   res.status(201).json(await exercisesService.createExercise(res.locals.userId, input));

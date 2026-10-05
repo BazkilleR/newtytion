@@ -1,6 +1,7 @@
 import { formatSet, nextSetDefaults } from "@fitness/shared";
-import { Copy } from "lucide-react";
+import { Copy, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { NumberStepper } from "@/components/NumberStepper.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.jsx";
@@ -67,8 +68,13 @@ export function ExerciseCard({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">{exercise.name}</CardTitle>
+        <Button asChild variant="ghost" size="icon-lg">
+          <Link to={`/exercises/${exercise.id}`} aria-label={`${exercise.name} progress`}>
+            <TrendingUp />
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent className="grid gap-3">
         {lastSets.length > 0 && (

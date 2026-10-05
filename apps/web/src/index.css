@@ -133,3 +133,21 @@
     @apply font-sans;
   }
 }
+
+/* Chart tokens. Validated with the dataviz palette script against the card
+   surface (light #ffffff, dark #171717): series-1 passes band + contrast in
+   both modes; series-1 vs the muted mark passes CVD (ΔE 15.9) and
+   normal-vision (ΔE ≥ 17) separation. The muted mark is a deliberate gray
+   (de-emphasis role), so it is exempt from the categorical chroma floor. */
+:root {
+  --viz-series-1: #2a78d6;
+  --viz-muted-mark: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-tick: #898781;
+}
+.dark {
+  --viz-series-1: #3987e5;
+  --viz-grid: #2c2c2a;
+  --viz-axis: #383835;
+}

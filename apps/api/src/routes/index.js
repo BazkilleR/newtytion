@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/require-auth.js";
+import { bodyLogsRouter } from "./body-logs.js";
 import { exercisesRouter } from "./exercises.js";
 import { foodsRouter } from "./foods.js";
 import { goalsRouter } from "./goals.js";
@@ -21,3 +22,4 @@ apiRouter.use("/meals", mealsRouter);
 apiRouter.use("/goals", goalsRouter);
 apiRouter.use("/exercises", exercisesRouter);
 apiRouter.use("/workouts", workoutsRouter);
+apiRouter.use("/body-logs", bodyLogsRouter);

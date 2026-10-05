@@ -1,4 +1,4 @@
-import { CalendarDays, Dumbbell, LogOut, Settings } from "lucide-react";
+import { CalendarDays, Dumbbell, LogOut, Scale, Settings, TrendingUp } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
 import { signOut, useSession } from "@/lib/auth-client.js";
@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils.js";
 const NAV_ITEMS = [
   { to: "/", label: "Today", icon: CalendarDays, end: true },
   { to: "/workouts", label: "Workouts", icon: Dumbbell },
+  { to: "/body", label: "Body", icon: Scale },
+  { to: "/exercises", label: "Progress", icon: TrendingUp },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
