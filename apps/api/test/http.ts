@@ -1,0 +1,13 @@
+import type { AddressInfo } from "node:net";
+import type { Express } from "express";
+
+/** Start an app on an ephemeral port; returns its base URL and a close function. */
+export async function listen(app: Express) {
+  const server = app.listen(0);
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  const { port } = server.address() as AddressInfo;
+  return {
+    url: `http://127.0.0.1:${port}`,
+    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+  };
+}
