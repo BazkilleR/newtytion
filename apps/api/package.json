@@ -4,16 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=../../.env src/index.js",
-    "start": "node --env-file=../../.env src/index.js",
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "node --env-file=../../.env src/db/seed.js"
+    "db:seed": "node src/db/seed.js"
   },
   "dependencies": {
     "@fitness/shared": "workspace:*",
     "better-auth": "^1.7.7",
+    "dotenv": "^18.0.5",
     "drizzle-orm": "^0.45.3",
     "express": "^5.2.1",
     "pg": "^8.23.1",

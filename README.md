@@ -38,7 +38,7 @@ the browser only ever sees one origin (no CORS, first-party cookies).
 
 ## Environment variables
 
-All in the root `.env` (loaded with Node's built-in `--env-file`).
+All in the root `.env`, loaded by `apps/api/src/load-env.js` (dotenv). Variables already set in the environment win.
 
 | Var | Used by | Notes |
 |---|---|---|
@@ -82,3 +82,20 @@ All in the root `.env` (loaded with Node's built-in `--env-file`).
   Services always scope queries to that id, never to a `user_id` in the body.
 - Web: `useSession()` from `better-auth/react`; `<RequireAuth>` and
   `<GuestOnly>` layout routes in `apps/web/src/App.jsx` handle redirects.
+
+## API
+
+All routes are under `/api` and require a session except `/api/health` and
+`/api/auth/*`. Bodies and queries are validated with the Zod schemas in
+`packages/shared`; unknown fields (including any `userId`) are dropped.
+
+| Method & path | |
+|---|---|
+| `GET /foods?q=&limit=` | search global + own foods (own first) |
+| `POST /foods` | create a custom food |
+| `PATCH /foods/:id`, `DELETE /foods/:id` | own foods only; 409 `FOOD_IN_USE` if logged |
+| `GET /meals?date=YYYY-MM-DD` | `{ date, entries, totals, goals }` for the Today page |
+| `POST /meals` | `{ logDate, mealType, foodId, quantity }` (quantity = servings) |
+| `PATCH /meals/:id`, `DELETE /meals/:id` | own entries only |
+| `GET /goals`, `PUT /goals` | daily kcal/protein targets (defaults until set) |
+| `GET /me` | current user |

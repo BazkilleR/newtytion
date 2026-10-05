@@ -1,11 +1,5 @@
+import "./src/load-env.js";
 import { defineConfig } from "drizzle-kit";
-
-// Node 24 can load .env natively, no dotenv needed.
-try {
-  process.loadEnvFile("../../.env");
-} catch {
-  // In CI the variables come from the environment instead.
-}
 
 export default defineConfig({
   dialect: "postgresql",

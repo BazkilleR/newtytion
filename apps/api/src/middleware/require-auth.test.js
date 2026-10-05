@@ -1,9 +1,7 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { cookieHeader, signUp } from "../../test/auth.js";
-import { resetDb } from "../../test/db.js";
 import { listen } from "../../test/http.js";
 import { createApp } from "../app.js";
-import { pool } from "../db/client.js";
 
 const ORIGIN = process.env.BETTER_AUTH_URL;
 let server;
@@ -12,11 +10,8 @@ beforeAll(async () => {
   server = await listen(createApp());
 });
 
-beforeEach(resetDb);
-
 afterAll(async () => {
   await server.close();
-  await pool.end();
 });
 
 describe("requireAuth", () => {

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { listen } from "../test/http.js";
 import { createApp } from "./app.js";
-import { pool } from "./db/client.js";
 
 let server;
 
@@ -11,7 +10,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await server.close();
-  await pool.end();
 });
 
 describe("app", () => {

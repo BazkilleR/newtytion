@@ -1,3 +1,5 @@
+// Must be the first import: populates process.env before it is parsed below.
+import "./load-env.js";
 import { z } from "zod";
 
 // Validate env once at startup so a missing var crashes immediately with a

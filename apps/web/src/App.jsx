@@ -1,8 +1,10 @@
 import { Route, Routes } from "react-router";
 import { GuestOnly, RequireAuth } from "./components/auth/RequireAuth.jsx";
 import { AppLayout } from "./components/layout/AppLayout.jsx";
+import { AddFoodPage } from "./pages/AddFoodPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
 import { NotFoundPage } from "./pages/NotFoundPage.jsx";
+import { SettingsPage } from "./pages/SettingsPage.jsx";
 import { SignupPage } from "./pages/SignupPage.jsx";
 import { TodayPage } from "./pages/TodayPage.jsx";
 
@@ -17,6 +19,8 @@ export function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<TodayPage />} />
+          <Route path="food/add" element={<AddFoodPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>
 

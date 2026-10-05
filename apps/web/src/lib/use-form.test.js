@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { fieldErrorsFrom } from "./use-form.js";
+import { fieldErrorsFrom, toNumber } from "./use-form.js";
 
 describe("fieldErrorsFrom", () => {
   it("keeps the first message per field", () => {
@@ -15,5 +15,17 @@ describe("fieldErrorsFrom", () => {
   it("puts object-level errors under `form`", () => {
     const schema = z.string().min(1, "required");
     expect(fieldErrorsFrom(schema.safeParse("").error)).toEqual({ form: "required" });
+  });
+});
+
+describe("toNumber", () => {
+  it.each([
+    ["12", 12],
+    [" 2.5 ", 2.5],
+    ["", undefined],
+    ["abc", undefined],
+    [7, 7],
+  ])("%j -> %j", (input, expected) => {
+    expect(toNumber(input)).toBe(expected);
   });
 });

@@ -1,5 +1,14 @@
 import { useState } from "react";
 
+/** Input string -> number, or undefined when empty/invalid (so Zod reports "Enter a number"). */
+export function toNumber(value) {
+  if (typeof value === "number") return value;
+  const trimmed = String(value ?? "").trim();
+  if (trimmed === "") return undefined;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 /** Zod error -> { fieldName: "first message" } */
 export function fieldErrorsFrom(zodError) {
   const errors = {};
@@ -14,8 +23,11 @@ export function fieldErrorsFrom(zodError) {
  * Minimal form state: controlled values, per-field errors from a Zod schema,
  * and a submit handler that only runs `onSubmit` with parsed, valid data.
  * If `onSubmit` throws, the message is shown as `formError`.
+ *
+ * `prepare(values)` runs before validation, e.g. to turn input strings into
+ * numbers (see `toNumber`).
  */
-export function useForm({ schema, initialValues, onSubmit }) {
+export function useForm({ schema, initialValues, onSubmit, prepare = (v) => v }) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
@@ -38,7 +50,7 @@ export function useForm({ schema, initialValues, onSubmit }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const result = schema.safeParse(values);
+    const result = schema.safeParse(prepare(values));
     if (!result.success) {
       setErrors(fieldErrorsFrom(result.error));
       return;
