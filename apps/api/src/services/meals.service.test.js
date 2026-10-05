@@ -55,11 +55,9 @@ describe("getDailyMeals", () => {
 
   it("uses the user's own goals once set", async () => {
     const { me } = await setup();
-    await upsertGoals(me.id, { kcalTarget: 2400, proteinTargetG: 160 });
-    expect((await getDailyMeals(me.id, DAY)).goals).toEqual({
-      kcalTarget: 2400,
-      proteinTargetG: 160,
-    });
+    const mine = { kcalTarget: 2400, proteinTargetG: 160, carbTargetG: 280, fatTargetG: 67 };
+    await upsertGoals(me.id, mine);
+    expect((await getDailyMeals(me.id, DAY)).goals).toEqual(mine);
   });
 
   it("only includes that calendar day and that user", async () => {

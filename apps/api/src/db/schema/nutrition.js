@@ -76,6 +76,8 @@ export const goals = pgTable("goals", {
     .references(() => user.id, { onDelete: "cascade" }),
   kcalTarget: integer().notNull(),
   proteinTargetG: integer().notNull(),
+  carbTargetG: integer().notNull(),
+  fatTargetG: integer().notNull(),
   updatedAt: timestamp({ withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date())

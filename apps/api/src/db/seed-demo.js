@@ -1,4 +1,4 @@
-import { addDays, todayIn } from "@fitness/shared";
+import { addDays, suggestMacroTargets, todayIn } from "@fitness/shared";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { auth } from "../auth.js";
 import { db } from "./client.js";
@@ -81,7 +81,12 @@ export async function seedDemo() {
     body: { email: DEMO_EMAIL, password: DEMO_PASSWORD, name: "Demo" },
   });
 
-  await db.insert(goals).values({ userId: demo.id, kcalTarget: 2300, proteinTargetG: 150 });
+  await db.insert(goals).values({
+    userId: demo.id,
+    kcalTarget: 2300,
+    proteinTargetG: 150,
+    ...suggestMacroTargets(2300, 150),
+  });
 
   // Body weight: slow cut from ~78 kg with daily noise, ~15% of days skipped.
   const logs = [];

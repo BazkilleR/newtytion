@@ -8,15 +8,26 @@ describe("goals", () => {
     const me = await createUser();
     expect(await getGoals(me.id)).toEqual(DEFAULT_GOALS);
 
-    await upsertGoals(me.id, { kcalTarget: 2200, proteinTargetG: 150 });
-    await upsertGoals(me.id, { kcalTarget: 2300, proteinTargetG: 155 });
-    expect(await getGoals(me.id)).toEqual({ kcalTarget: 2300, proteinTargetG: 155 });
+    await upsertGoals(me.id, {
+      kcalTarget: 2200,
+      proteinTargetG: 150,
+      carbTargetG: 250,
+      fatTargetG: 60,
+    });
+    const updated = { kcalTarget: 2300, proteinTargetG: 155, carbTargetG: 270, fatTargetG: 65 };
+    await upsertGoals(me.id, updated);
+    expect(await getGoals(me.id)).toEqual(updated);
   });
 
   it("is per user", async () => {
     const a = await createUser();
     const b = await createUser();
-    await upsertGoals(a.id, { kcalTarget: 1800, proteinTargetG: 100 });
+    await upsertGoals(a.id, {
+      kcalTarget: 1800,
+      proteinTargetG: 100,
+      carbTargetG: 200,
+      fatTargetG: 50,
+    });
     expect(await getGoals(b.id)).toEqual(DEFAULT_GOALS);
   });
 });
