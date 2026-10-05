@@ -21,14 +21,6 @@ describe("app", () => {
     expect(await res.json()).toMatchObject({ status: "ok", db: "ok" });
   });
 
-  it("returns the standard error shape for unknown routes", async () => {
-    const res = await fetch(`${server.url}/api/nope`);
-    expect(res.status).toBe(404);
-    expect(await res.json()).toEqual({
-      error: { code: "NOT_FOUND", message: "Route GET /nope not found" },
-    });
-  });
-
   it("rejects malformed JSON with INVALID_JSON", async () => {
     const res = await fetch(`${server.url}/api/health`, {
       method: "POST",

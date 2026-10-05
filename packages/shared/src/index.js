@@ -1,4 +1,5 @@
 export * from "./logic/date.js";
+export * from "./schemas/auth.js";
 export * from "./schemas/body.js";
 export * from "./schemas/common.js";
 export * from "./schemas/exercise.js";
