@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm --parallel --filter @fitness/api --filter @fitness/web dev",
-    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm --filter @fitness/web build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "pnpm -r test",
@@ -17,7 +17,6 @@
     "db:seed": "pnpm --filter @fitness/api db:seed"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15",
-    "typescript": "^7.0.2"
+    "@biomejs/biome": "^2.5.15"
   }
 }

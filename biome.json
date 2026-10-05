@@ -1,13 +1,16 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "includes": [
       "**",
-      "!**/routeTree.gen.ts",
       "!**/drizzle/meta",
       "!apps/web/src/components/ui",
-      "!apps/api/src/db/schema/auth.ts"
+      "!apps/api/src/db/schema/auth.js"
     ]
   },
   "formatter": {
@@ -17,7 +20,9 @@
     "lineWidth": 100
   },
   "css": {
-    "parser": { "tailwindDirectives": true }
+    "parser": {
+      "tailwindDirectives": true
+    }
   },
   "linter": {
     "enabled": true,
@@ -25,5 +30,11 @@
       "preset": "recommended"
     }
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } }
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
 }
