@@ -1,8 +1,17 @@
+import { addDays, todayIn } from "@fitness/shared";
+
 export const MEAL_LABELS = {
   breakfast: "Breakfast",
   lunch: "Lunch",
   dinner: "Dinner",
   snack: "Snack",
+};
+
+export const ACTIVITY_LABELS = {
+  weights: "Weights",
+  running: "Running",
+  judo: "Judo",
+  other: "Other",
 };
 
 export const formatKcal = (n) => Math.round(n).toLocaleString("en-US");
@@ -22,11 +31,11 @@ const dayFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-/** "Today", "Yesterday", or "Mon 5 Oct". `date` and `today` are YYYY-MM-DD. */
-export function formatDayLabel(date, today, yesterday, tomorrow) {
+/** "Today", "Yesterday", "Tomorrow" or "Mon 5 Oct". Dates are YYYY-MM-DD. */
+export function formatDayLabel(date, today = todayIn()) {
   if (date === today) return "Today";
-  if (date === yesterday) return "Yesterday";
-  if (date === tomorrow) return "Tomorrow";
+  if (date === addDays(today, -1)) return "Yesterday";
+  if (date === addDays(today, 1)) return "Tomorrow";
   // Parse as UTC midnight and format in UTC so the calendar day can't shift.
   return dayFormatter.format(new Date(`${date}T00:00:00Z`));
 }

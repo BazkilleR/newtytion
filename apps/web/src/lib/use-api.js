@@ -3,7 +3,10 @@ import { api } from "./api.js";
 
 /**
  * Fetch JSON from the API when the component mounts or `path`/`query` change.
- * Returns { data, error, isLoading, refetch }.
+ * Returns { data, error, isLoading, refetch, setData }.
+ *
+ * `setData(updater)` patches the cached data locally, e.g. with the object a
+ * POST returned, so the screen updates without another round trip.
  *
  * A stale request is aborted when inputs change or the component unmounts, so
  * a slow old response can never overwrite a newer one.
@@ -32,6 +35,11 @@ export function useApi(path, { query, enabled = true } = {}) {
   }, [path, queryKey, enabled, version]);
 
   const refetch = useCallback(() => setVersion((v) => v + 1), []);
+  const setData = useCallback(
+    (updater) =>
+      setState((s) => ({ ...s, data: typeof updater === "function" ? updater(s.data) : updater })),
+    [],
+  );
 
-  return { ...state, refetch };
+  return { ...state, refetch, setData };
 }

@@ -7,6 +7,8 @@ import { NotFoundPage } from "./pages/NotFoundPage.jsx";
 import { SettingsPage } from "./pages/SettingsPage.jsx";
 import { SignupPage } from "./pages/SignupPage.jsx";
 import { TodayPage } from "./pages/TodayPage.jsx";
+import { WorkoutPage } from "./pages/WorkoutPage.jsx";
+import { WorkoutsPage } from "./pages/WorkoutsPage.jsx";
 
 export function App() {
   return (
@@ -20,6 +22,8 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route index element={<TodayPage />} />
           <Route path="food/add" element={<AddFoodPage />} />
+          <Route path="workouts" element={<WorkoutsPage />} />
+          <Route path="workouts/:workoutId" element={<WorkoutPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Route>

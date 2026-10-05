@@ -40,6 +40,17 @@ export const updateSetInputSchema = z.object({
 
 export const copyLastSessionInputSchema = z.object({ exerciseId: idSchema });
 
+export const setParamsSchema = z.object({ id: idSchema, setId: idSchema });
+
+export const workoutListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+});
+
+export const lastSetsQuerySchema = z.object({
+  /** Only look at sessions before this workout (the one being logged). */
+  beforeWorkoutId: idSchema.optional(),
+});
+
 export const workoutSetSchema = z.object({
   id: idSchema,
   workoutId: idSchema,

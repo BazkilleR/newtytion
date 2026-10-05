@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db } from "../src/db/client.js";
-import { foods, user } from "../src/db/schema/index.js";
+import { exercises, foods, user } from "../src/db/schema/index.js";
 
 /** Insert a user row directly (no password) — enough for service tests. */
 export async function createUser(overrides = {}) {
@@ -32,6 +32,20 @@ export async function createFood(userId, overrides = {}) {
       fatG: 2,
       servingSize: 1,
       servingUnit: "plate",
+      ...overrides,
+    })
+    .returning();
+  return row;
+}
+
+/** Insert an exercise. Pass userId = null for a global exercise. */
+export async function createExercise(userId, overrides = {}) {
+  const [row] = await db
+    .insert(exercises)
+    .values({
+      userId,
+      name: `Exercise ${randomUUID().slice(0, 8)}`,
+      muscleGroup: "legs",
       ...overrides,
     })
     .returning();

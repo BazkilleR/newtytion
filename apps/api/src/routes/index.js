@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/require-auth.js";
+import { exercisesRouter } from "./exercises.js";
 import { foodsRouter } from "./foods.js";
 import { goalsRouter } from "./goals.js";
 import { healthRouter } from "./health.js";
 import { meRouter } from "./me.js";
 import { mealsRouter } from "./meals.js";
+import { workoutsRouter } from "./workouts.js";
 
 export const apiRouter = Router();
 
@@ -17,3 +19,5 @@ apiRouter.use("/me", meRouter);
 apiRouter.use("/foods", foodsRouter);
 apiRouter.use("/meals", mealsRouter);
 apiRouter.use("/goals", goalsRouter);
+apiRouter.use("/exercises", exercisesRouter);
+apiRouter.use("/workouts", workoutsRouter);

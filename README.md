@@ -98,4 +98,11 @@ All routes are under `/api` and require a session except `/api/health` and
 | `POST /meals` | `{ logDate, mealType, foodId, quantity }` (quantity = servings) |
 | `PATCH /meals/:id`, `DELETE /meals/:id` | own entries only |
 | `GET /goals`, `PUT /goals` | daily kcal/protein targets (defaults until set) |
+| `GET /exercises`, `POST /exercises` | global + own exercises; create a custom one |
+| `GET /exercises/:id/last-sets?beforeWorkoutId=` | sets from the most recent earlier session with that exercise |
+| `GET /workouts?limit=` | recent workouts with set/exercise counts |
+| `POST /workouts`, `GET/PATCH/DELETE /workouts/:id` | workout + its sets grouped by exercise |
+| `POST /workouts/:id/sets` | `{ exerciseId, weightKg, reps, rpe? }`; `setNo` assigned by the server |
+| `PATCH/DELETE /workouts/:id/sets/:setId` | edit or remove a set |
+| `POST /workouts/:id/copy-last` | `{ exerciseId }` — append the previous session's sets |
 | `GET /me` | current user |

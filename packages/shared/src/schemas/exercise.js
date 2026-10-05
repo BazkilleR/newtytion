@@ -1,11 +1,21 @@
 import { z } from "zod";
 import { idSchema, isoDateSchema } from "./common.js";
 
+export const MUSCLE_GROUP_LABELS = {
+  chest: "Chest",
+  back: "Back",
+  shoulders: "Shoulders",
+  arms: "Arms",
+  legs: "Legs",
+  core: "Core",
+  full_body: "Full body",
+};
+
 export const MUSCLE_GROUPS = ["chest", "back", "shoulders", "arms", "legs", "core", "full_body"];
 export const muscleGroupSchema = z.enum(MUSCLE_GROUPS);
 
 export const createExerciseInputSchema = z.object({
-  name: z.string().trim().min(1).max(100),
+  name: z.string().trim().min(1, "Enter a name").max(100),
   muscleGroup: muscleGroupSchema,
 });
 

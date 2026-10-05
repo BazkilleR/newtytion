@@ -26,7 +26,7 @@ function useSelectedDate() {
 }
 
 function DateNav({ date, today, setDate }) {
-  const label = formatDayLabel(date, today, addDays(today, -1), addDays(today, 1));
+  const label = formatDayLabel(date, today);
   return (
     <div className="flex items-center justify-between">
       <Button
