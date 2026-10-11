@@ -13,7 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.js";
-import { activityTypeEnum, muscleGroupEnum } from "./enums.js";
+import { muscleGroupEnum } from "./enums.js";
 
 /** user_id NULL = global (seeded) exercise. */
 export const exercises = pgTable(
@@ -23,6 +23,7 @@ export const exercises = pgTable(
     userId: text().references(() => user.id, { onDelete: "cascade" }),
     name: text().notNull(),
     muscleGroup: muscleGroupEnum().notNull(),
+    secondaryMuscles: muscleGroupEnum().array().notNull().default(sql`'{}'`),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
@@ -39,7 +40,6 @@ export const workouts = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     logDate: date({ mode: "string" }).notNull(),
-    activityType: activityTypeEnum().notNull(),
     durationMin: integer(),
     note: text(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),

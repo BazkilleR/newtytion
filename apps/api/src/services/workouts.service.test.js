@@ -7,18 +7,18 @@ import {
   deleteSet,
   deleteWorkout,
   getLastSession,
+  getMuscleSets,
   getWorkoutDetail,
   listWorkouts,
   updateSet,
   updateWorkout,
 } from "./workouts.service.js";
 
-const weights = (userId, logDate = "2026-10-06") =>
-  createWorkout(userId, { logDate, activityType: "weights" });
+const weights = (userId, logDate = "2026-10-06") => createWorkout(userId, { logDate });
 
 async function setup() {
   const me = await createUser();
-  const squat = await createExercise(null, { name: "Squat", muscleGroup: "legs" });
+  const squat = await createExercise(null, { name: "Squat", muscleGroup: "quads" });
   const bench = await createExercise(null, { name: "Bench", muscleGroup: "chest" });
   return { me, squat, bench };
 }
@@ -31,7 +31,7 @@ describe("workouts", () => {
     const other = await createUser();
     const older = await weights(me.id, "2026-10-01");
     const newer = await weights(me.id, "2026-10-05");
-    await createWorkout(me.id, { logDate: "2026-10-03", activityType: "judo", durationMin: 90 });
+    await createWorkout(me.id, { logDate: "2026-10-03", durationMin: 60 });
     await weights(other.id, "2026-10-06");
 
     await addSet(me.id, older.id, { exerciseId: squat.id, weightKg: 60, reps: 5 });
@@ -39,10 +39,10 @@ describe("workouts", () => {
     await addSet(me.id, older.id, { exerciseId: bench.id, weightKg: 40, reps: 8 });
 
     const list = await listWorkouts(me.id, { limit: 30 });
-    expect(list.map((w) => [w.logDate, w.activityType])).toEqual([
-      ["2026-10-05", "weights"],
-      ["2026-10-03", "judo"],
-      ["2026-10-01", "weights"],
+    expect(list.map((w) => [w.logDate, w.durationMin])).toEqual([
+      ["2026-10-05", null],
+      ["2026-10-03", 60],
+      ["2026-10-01", null],
     ]);
     expect(list[0]).toMatchObject({ id: newer.id, setCount: 0, exerciseCount: 0 });
     expect(list[2]).toMatchObject({ setCount: 3, exerciseCount: 2 });
@@ -207,5 +207,41 @@ describe("last session", () => {
       status: 404,
       code: "NO_PREVIOUS_SESSION",
     });
+  });
+});
+
+describe("muscle sets", () => {
+  const sets = (list) => Object.fromEntries(list.map((r) => [r.muscle, r.sets]));
+
+  it("counts own sets in the range, secondary muscles at half", async () => {
+    const me = await createUser();
+    const other = await createUser();
+    const bench = await createExercise(null, {
+      name: "Bench",
+      muscleGroup: "chest",
+      secondaryMuscles: ["triceps", "shoulders"],
+    });
+    const pushdown = await createExercise(null, { name: "Pushdown", muscleGroup: "triceps" });
+
+    const before = await weights(me.id, "2026-09-30");
+    const first = await weights(me.id, "2026-10-01");
+    const last = await weights(me.id, "2026-10-07");
+    const after = await weights(me.id, "2026-10-08");
+    const theirs = await weights(other.id, "2026-10-03");
+    for (const w of [before, after]) {
+      await addSet(me.id, w.id, { exerciseId: bench.id, weightKg: 60, reps: 8 });
+    }
+    await addSet(other.id, theirs.id, { exerciseId: bench.id, weightKg: 60, reps: 8 });
+    await addSet(me.id, first.id, { exerciseId: bench.id, weightKg: 60, reps: 8 });
+    await addSet(me.id, first.id, { exerciseId: bench.id, weightKg: 60, reps: 8 });
+    await addSet(me.id, last.id, { exerciseId: bench.id, weightKg: 60, reps: 8 });
+    await addSet(me.id, last.id, { exerciseId: pushdown.id, weightKg: 20, reps: 12 });
+    await addSet(me.id, last.id, { exerciseId: pushdown.id, weightKg: 20, reps: 0 }); // failed
+
+    const result = sets(await getMuscleSets(me.id, { from: "2026-10-01", to: "2026-10-07" }));
+    expect(result.chest).toBe(3);
+    expect(result.triceps).toBe(2.5);
+    expect(result.shoulders).toBe(1.5);
+    expect(result.quads).toBe(0);
   });
 });

@@ -1,5 +1,6 @@
 export * from "./logic/date.js";
 export * from "./logic/moving-average.js";
+export * from "./logic/muscle-volume.js";
 export * from "./logic/nutrition.js";
 export * from "./logic/one-rep-max.js";
 export * from "./logic/workout.js";

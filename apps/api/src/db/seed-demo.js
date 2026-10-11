@@ -32,27 +32,35 @@ const roundTo = (n, step) => Math.round(n / step) * step;
 /**
  * Three sessions a week (Mon / Wed / Fri) with linear progression. Each lift
  * appears on one day only, so its e1RM history is one clean point per week.
+ * Leg-heavy on purpose, so the muscle map shows high, medium and low volume.
  */
 const WEEKLY_PLAN = [
   {
     dayOffset: 0,
     lifts: [
-      { name: "Back Squat", startKg: 60, kgPerWeek: 2.5, reps: 5, sets: 3 },
-      { name: "Barbell Bench Press", startKg: 40, kgPerWeek: 1.25, reps: 8, sets: 3 },
+      { name: "Back Squat", startKg: 60, kgPerWeek: 2.5, reps: 5, sets: 6 },
+      { name: "Barbell Bench Press", startKg: 40, kgPerWeek: 1.25, reps: 8, sets: 5 },
+      { name: "Overhead Press", startKg: 25, kgPerWeek: 0.5, reps: 8, sets: 3 },
+      { name: "Triceps Pushdown", startKg: 15, kgPerWeek: 0.5, reps: 12, sets: 3 },
     ],
   },
   {
     dayOffset: 2,
     lifts: [
       { name: "Deadlift", startKg: 80, kgPerWeek: 5, reps: 5, sets: 1 },
-      { name: "Barbell Row", startKg: 40, kgPerWeek: 1.25, reps: 8, sets: 3 },
+      { name: "Barbell Row", startKg: 40, kgPerWeek: 1.25, reps: 8, sets: 4 },
+      { name: "Pull-up", startKg: 0, kgPerWeek: 0.5, reps: 6, sets: 3 },
+      { name: "Barbell Curl", startKg: 20, kgPerWeek: 0.5, reps: 10, sets: 3 },
     ],
   },
   {
     dayOffset: 4,
     lifts: [
-      { name: "Front Squat", startKg: 45, kgPerWeek: 2.5, reps: 6, sets: 3 },
-      { name: "Incline Dumbbell Press", startKg: 16, kgPerWeek: 1, reps: 10, sets: 3 },
+      { name: "Front Squat", startKg: 45, kgPerWeek: 2.5, reps: 6, sets: 5 },
+      { name: "Incline Dumbbell Press", startKg: 16, kgPerWeek: 1, reps: 10, sets: 5 },
+      { name: "Leg Press", startKg: 100, kgPerWeek: 5, reps: 10, sets: 5 },
+      { name: "Walking Lunge", startKg: 10, kgPerWeek: 1, reps: 10, sets: 4 },
+      { name: "Calf Raise", startKg: 40, kgPerWeek: 2.5, reps: 12, sets: 3 },
     ],
   },
 ];
@@ -115,7 +123,6 @@ export async function seedDemo() {
         .values({
           userId: demo.id,
           logDate,
-          activityType: "weights",
           durationMin: 55 + Math.round(rand() * 20),
         })
         .returning();
@@ -131,13 +138,6 @@ export async function seedDemo() {
       await db.insert(workoutSets).values(rows);
     }
   }
-  await db.insert(workouts).values({
-    userId: demo.id,
-    logDate: addDays(today, -1),
-    activityType: "judo",
-    durationMin: 90,
-    note: "Randori",
-  });
 
   // Today's meals
   const food = await globalIdsByName(foods, [

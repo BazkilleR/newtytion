@@ -6,7 +6,7 @@ import { ExerciseCard } from "@/components/workouts/ExerciseCard.jsx";
 import { ExercisePicker } from "@/components/workouts/ExercisePicker.jsx";
 import { WorkoutDetailsForm } from "@/components/workouts/WorkoutDetailsForm.jsx";
 import { api } from "@/lib/api.js";
-import { ACTIVITY_LABELS, formatDayLabel } from "@/lib/format.js";
+import { formatDayLabel } from "@/lib/format.js";
 import { useApi } from "@/lib/use-api.js";
 import { addSets, removeSet, replaceSet, withPendingExercises } from "@/lib/workout-state.js";
 
@@ -30,7 +30,6 @@ export function WorkoutPage() {
   if (!detail.data) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   const workout = detail.data;
-  const isWeights = workout.activityType === "weights";
   const groups = withPendingExercises(workout, pendingExercises);
 
   async function handleDelete() {
@@ -48,7 +47,7 @@ export function WorkoutPage() {
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">{ACTIVITY_LABELS[workout.activityType]}</h1>
+          <h1 className="text-xl font-bold">Workout</h1>
           <p className="text-sm text-muted-foreground">{formatDayLabel(workout.logDate)}</p>
         </div>
         <Button variant="ghost" size="icon-lg" onClick={handleDelete} aria-label="Delete workout">
@@ -56,37 +55,33 @@ export function WorkoutPage() {
         </Button>
       </div>
 
-      {isWeights && (
-        <>
-          {groups.map(({ exercise, sets }) => (
-            <ExerciseCard
-              key={exercise.id}
-              workoutId={workout.id}
-              exercise={exercise}
-              sets={sets}
-              onSetsAdded={(ex, newSets) => detail.setData((d) => addSets(d, ex, newSets))}
-              onSetUpdated={(set) => detail.setData((d) => replaceSet(d, set))}
-              onSetDeleted={(setId) => detail.setData((d) => removeSet(d, setId))}
-            />
-          ))}
-          <Button
-            variant="outline"
-            className="h-14 border-dashed text-base"
-            onClick={() => setPicking(true)}
-          >
-            <Plus /> Add exercise
-          </Button>
-          <ExercisePicker
-            open={picking}
-            onOpenChange={setPicking}
-            excludeIds={groups.map((g) => g.exercise.id)}
-            onPick={(exercise) => setPendingExercises((list) => [...list, exercise])}
-          />
-        </>
-      )}
+      {groups.map(({ exercise, sets }) => (
+        <ExerciseCard
+          key={exercise.id}
+          workoutId={workout.id}
+          exercise={exercise}
+          sets={sets}
+          onSetsAdded={(ex, newSets) => detail.setData((d) => addSets(d, ex, newSets))}
+          onSetUpdated={(set) => detail.setData((d) => replaceSet(d, set))}
+          onSetDeleted={(setId) => detail.setData((d) => removeSet(d, setId))}
+        />
+      ))}
+      <Button
+        variant="outline"
+        className="h-14 border-dashed text-base"
+        onClick={() => setPicking(true)}
+      >
+        <Plus /> Add exercise
+      </Button>
+      <ExercisePicker
+        open={picking}
+        onOpenChange={setPicking}
+        excludeIds={groups.map((g) => g.exercise.id)}
+        onPick={(exercise) => setPendingExercises((list) => [...list, exercise])}
+      />
 
       <section className="grid gap-2">
-        {isWeights && <h2 className="font-semibold">Details</h2>}
+        <h2 className="font-semibold">Details</h2>
         <WorkoutDetailsForm
           key={workout.id}
           workout={workout}

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label.jsx";
 import { api } from "@/lib/api.js";
 import { toNumber, useForm } from "@/lib/use-form.js";
 
-/** Date, duration and note — the whole log for running/judo, optional extras for weights. */
+/** Date, duration and note: optional extras around the logged sets. */
 export function WorkoutDetailsForm({ workout, onSaved }) {
   const [saved, setSaved] = useState(false);
   const form = useForm({

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isoDateSchema } from "./common.js";
+import { dateRangeQuerySchema, isoDateSchema } from "./common.js";
 
 export const upsertBodyLogInputSchema = z.object({
   weightKg: z
@@ -10,12 +10,7 @@ export const upsertBodyLogInputSchema = z.object({
 
 export const bodyLogDateParamsSchema = z.object({ date: isoDateSchema });
 
-export const bodyLogRangeQuerySchema = z
-  .object({
-    from: isoDateSchema,
-    to: isoDateSchema,
-  })
-  .refine((q) => q.from <= q.to, { message: "`from` must be on or before `to`", path: ["from"] });
+export const bodyLogRangeQuerySchema = dateRangeQuerySchema;
 
 export const bodyLogSchema = z.object({
   logDate: isoDateSchema,

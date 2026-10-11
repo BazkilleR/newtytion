@@ -45,7 +45,7 @@ export async function createExercise(userId, overrides = {}) {
     .values({
       userId,
       name: `Exercise ${randomUUID().slice(0, 8)}`,
-      muscleGroup: "legs",
+      muscleGroup: "quads",
       ...overrides,
     })
     .returning();

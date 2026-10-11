@@ -15,6 +15,13 @@
       "when": 1791226911269,
       "tag": "0001_goals_carb_fat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791708187672,
+      "tag": "0002_weights_only_muscles",
+      "breakpoints": true
     }
   ]
 }

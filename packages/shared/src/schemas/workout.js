@@ -1,13 +1,9 @@
 import { z } from "zod";
-import { idSchema, isoDateSchema } from "./common.js";
-import { exerciseSchema } from "./exercise.js";
-
-export const ACTIVITY_TYPES = ["weights", "running", "judo", "other"];
-export const activityTypeSchema = z.enum(ACTIVITY_TYPES);
+import { dateRangeQuerySchema, idSchema, isoDateSchema } from "./common.js";
+import { exerciseSchema, muscleGroupSchema } from "./exercise.js";
 
 export const createWorkoutInputSchema = z.object({
   logDate: isoDateSchema,
-  activityType: activityTypeSchema,
   durationMin: z
     .number()
     .int()
@@ -51,6 +47,16 @@ export const lastSetsQuerySchema = z.object({
   beforeWorkoutId: idSchema.optional(),
 });
 
+export const muscleSetsQuerySchema = dateRangeQuerySchema;
+
+/** Sets per muscle in a date range (secondary muscles count half), every muscle included. */
+export const muscleSetsSchema = z.array(
+  z.object({
+    muscle: muscleGroupSchema,
+    sets: z.number(),
+  }),
+);
+
 export const workoutSetSchema = z.object({
   id: idSchema,
   workoutId: idSchema,
@@ -64,7 +70,6 @@ export const workoutSetSchema = z.object({
 export const workoutSchema = z.object({
   id: idSchema,
   logDate: isoDateSchema,
-  activityType: activityTypeSchema,
   durationMin: z.number().int().nullable(),
   note: z.string().nullable(),
   createdAt: z.iso.datetime(),

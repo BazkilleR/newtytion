@@ -4,7 +4,7 @@ import { getExerciseHistory, listPerformedExercises } from "./exercises.service.
 import { addSet, createWorkout } from "./workouts.service.js";
 
 async function session(userId, logDate, exerciseId, sets) {
-  const w = await createWorkout(userId, { logDate, activityType: "weights" });
+  const w = await createWorkout(userId, { logDate });
   for (const [weightKg, reps] of sets) await addSet(userId, w.id, { exerciseId, weightKg, reps });
   return w;
 }

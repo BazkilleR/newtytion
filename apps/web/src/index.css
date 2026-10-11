@@ -151,3 +151,19 @@
   --viz-grid: #2c2c2a;
   --viz-axis: #383835;
 }
+
+/* Muscle map heat tokens: the dataviz status steps (good / warning / critical),
+   because the user asked for green / yellow / red. Critical is darkened to
+   #b42318 so green vs red keeps deutan ΔE 10.9 (≥ 8); #d03b3b was 4.1. Yellow is
+   1.8:1 on white, so the muscle list always names the level in text too. */
+:root {
+  --heat-low: #0ca30c;
+  --heat-medium: #fab219;
+  --heat-high: #b42318;
+  --heat-none: #d6d5ce;
+  --heat-body: #efeee8;
+}
+.dark {
+  --heat-none: #3a3a37;
+  --heat-body: #262624;
+}

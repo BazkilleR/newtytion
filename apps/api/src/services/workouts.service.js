@@ -1,5 +1,5 @@
-import { groupSetsByExercise } from "@fitness/shared";
-import { and, asc, count, countDistinct, desc, eq, max, ne, sql } from "drizzle-orm";
+import { groupSetsByExercise, setsPerMuscle } from "@fitness/shared";
+import { and, asc, count, countDistinct, desc, eq, gt, gte, lte, max, ne, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { exercises, workoutSets, workouts } from "../db/schema/index.js";
 import { PG_UNIQUE_VIOLATION, pgErrorCode } from "../lib/db-errors.js";
@@ -10,7 +10,6 @@ function toWorkout(row) {
   return {
     id: row.id,
     logDate: row.logDate,
-    activityType: row.activityType,
     durationMin: row.durationMin,
     note: row.note,
     createdAt: row.createdAt.toISOString(),
@@ -59,6 +58,32 @@ export async function createWorkout(userId, input) {
     .values({ ...input, userId })
     .returning();
   return toWorkout(row);
+}
+
+/**
+ * Sets per muscle between `from` and `to` (inclusive): a full set for the
+ * exercise's primary muscle, half for each secondary one. 0-rep sets don't count.
+ */
+export async function getMuscleSets(userId, { from, to }) {
+  const rows = await db
+    .select({
+      muscleGroup: exercises.muscleGroup,
+      secondaryMuscles: exercises.secondaryMuscles,
+      sets: count(workoutSets.id),
+    })
+    .from(workoutSets)
+    .innerJoin(workouts, eq(workoutSets.workoutId, workouts.id))
+    .innerJoin(exercises, eq(workoutSets.exerciseId, exercises.id))
+    .where(
+      and(
+        eq(workouts.userId, userId),
+        gte(workouts.logDate, from),
+        lte(workouts.logDate, to),
+        gt(workoutSets.reps, 0),
+      ),
+    )
+    .groupBy(exercises.id);
+  return setsPerMuscle(rows);
 }
 
 /** The workout row if it belongs to the user; 404 otherwise (no existence leak). */

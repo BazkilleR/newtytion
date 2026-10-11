@@ -8,7 +8,8 @@ import { seedFoods } from "./seed-data/foods.js";
 import { seedDemo } from "./seed-demo.js";
 
 // Idempotent: global rows are unique by name (partial unique index where
-// user_id is null), so re-running only inserts what's missing.
+// user_id is null), so re-running only inserts what's missing. Exercises also
+// update their muscles, so the seed file stays the source of truth for them.
 async function seedGlobals() {
   // Validate seed rows with the same schemas the API uses, so a typo fails loudly.
   const foodRows = z.array(createFoodInputSchema).parse(seedFoods);
@@ -20,15 +21,22 @@ async function seedGlobals() {
     .onConflictDoNothing({ target: foods.name, where: sql`${foods.userId} is null` })
     .returning({ id: foods.id });
 
-  const insertedExercises = await db
+  const upsertedExercises = await db
     .insert(exercises)
     .values(exerciseRows)
-    .onConflictDoNothing({ target: exercises.name, where: sql`${exercises.userId} is null` })
+    .onConflictDoUpdate({
+      target: exercises.name,
+      targetWhere: sql`${exercises.userId} is null`,
+      set: {
+        muscleGroup: sql`excluded.muscle_group`,
+        secondaryMuscles: sql`excluded.secondary_muscles`,
+      },
+    })
     .returning({ id: exercises.id });
 
   console.log(
     `foods: ${insertedFoods.length} inserted (${seedFoods.length} in seed)\n` +
-      `exercises: ${insertedExercises.length} inserted (${seedExercises.length} in seed)`,
+      `exercises: ${upsertedExercises.length} upserted (${seedExercises.length} in seed)`,
   );
 }
 

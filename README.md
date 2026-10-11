@@ -5,6 +5,7 @@ Personal web app for logging meals and weight-training workouts.
 - **Today** — meals grouped by breakfast/lunch/dinner/snack, kcal and protein vs goals
 - **Food log** — search ~30 built-in foods (incl. Thai dishes) or create your own
 - **Workout logger** — mobile-first: big steppers, one-tap "Log set", "Copy last session"
+- **Muscle map** — front/back body figure colored by sets per week for each muscle (7 / 14 / 30 days)
 - **Body weight** — daily weigh-ins with a 7-day moving average chart
 - **Progress** — estimated 1RM (Epley) per exercise over time
 
@@ -35,7 +36,7 @@ cp .env.example .env
 
 docker compose up -d     # Postgres on :5432, creates `fitness` and `fitness_test`
 pnpm db:migrate          # apply migrations in apps/api/drizzle
-pnpm db:seed             # global foods + exercises (safe to re-run)
+pnpm db:seed             # global foods + exercises (safe to re-run; updates exercise muscles)
 pnpm dev                 # api on :3000, web on http://localhost:5173
 ```
 
@@ -145,9 +146,10 @@ All routes are under `/api` and require a session except `/api/health` and
 | `POST /meals` | `{ logDate, mealType, foodId, quantity }` (quantity = servings) |
 | `PATCH /meals/:id`, `DELETE /meals/:id` | own entries only |
 | `GET /goals`, `PUT /goals` | daily kcal/protein targets (defaults until set) |
-| `GET /exercises`, `POST /exercises` | global + own exercises; create a custom one |
+| `GET /exercises`, `POST /exercises` | global + own exercises; create a custom one (`{ name, muscleGroup, secondaryMuscles? }`) |
 | `GET /exercises/:id/last-sets?beforeWorkoutId=` | sets from the most recent earlier session with that exercise |
 | `GET /workouts?limit=` | recent workouts with set/exercise counts |
+| `GET /workouts/muscle-sets?from=&to=` | sets per muscle in the range (secondary muscles count half), every muscle included |
 | `POST /workouts`, `GET/PATCH/DELETE /workouts/:id` | workout + its sets grouped by exercise |
 | `POST /workouts/:id/sets` | `{ exerciseId, weightKg, reps, rpe? }`; `setNo` assigned by the server |
 | `PATCH/DELETE /workouts/:id/sets/:setId` | edit or remove a set |

@@ -72,5 +72,7 @@ Tests run against a real Postgres (`TEST_DATABASE_URL`). `test/global-setup.js` 
 - **Dates**: `log_date` is a Postgres `DATE` holding the user's local day (Asia/Bangkok), passed around as `"YYYY-MM-DD"` strings, never as JS `Date`. Use the helpers in `packages/shared/src/logic/date.js`.
 - **Units**: weight is always stored in kg. Meal `quantity` is a number of servings.
 - **Moving average**: trailing 7 *calendar* days `[d-6, d]`. The body-logs endpoint reads 6 extra days before `from` so the first points have a full window.
+- **Weight training only**: workouts have no activity type. Each exercise has one primary `muscleGroup` and optional `secondaryMuscles` (13 muscles, `MUSCLE_GROUPS` in `schemas/exercise.js`, also the DB enum order). `pnpm db:seed` upserts global exercises by name, so `seed-data/exercises.js` is the source of truth for their muscles.
+- **Muscle volume**: a set counts 1 for the primary muscle and 0.5 for each secondary one; sets with 0 reps don't count. The muscle map colors by sets per week (`heatLevel`: <10 low/green, 10–19 medium/yellow, 20+ high/red). Logic is in `packages/shared/src/logic/muscle-volume.js`.
 - **e1RM**: Epley `weight × (1 + reps/30)`, and a 1-rep set counts as its own weight. History keeps the best set per training day.
 - **Formatting**: Biome, 2 spaces, line width 100, imports auto-organized.
