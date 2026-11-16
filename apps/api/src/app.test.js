@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { listen } from "../test/http.js";
 import { createApp } from "./app.js";
 

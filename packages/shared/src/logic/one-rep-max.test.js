@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { bestE1rmPerDay, epley1rm } from "./one-rep-max.js";
 
 describe("epley1rm", () => {

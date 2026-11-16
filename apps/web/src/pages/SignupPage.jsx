@@ -2,20 +2,21 @@ import { signUpInputSchema } from "@fitness/shared";
 import { Link, useNavigate } from "react-router";
 import { AuthCard } from "@/components/auth/AuthCard.jsx";
 import { FormField } from "@/components/FormField.jsx";
+import { PasswordField } from "@/components/PasswordField.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import { signUp } from "@/lib/auth-client.js";
+import { useAuth } from "@/lib/auth.jsx";
 import { useForm } from "@/lib/use-form.js";
 
 export function SignupPage() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const form = useForm({
     schema: signUpInputSchema,
     initialValues: { name: "", email: "", password: "" },
     onSubmit: async (values) => {
-      // autoSignIn is on, so a successful sign-up also sets the session cookie.
-      const { error } = await signUp.email(values);
-      if (error) throw new Error(error.message ?? "Could not sign up");
+      // Sign-up also logs in: the api sets the token cookies.
+      await signUp(values);
       navigate("/", { replace: true });
     },
   });
@@ -49,10 +50,9 @@ export function SignupPage() {
           error={form.errors.email}
           {...form.field("email")}
         />
-        <FormField
+        <PasswordField
           id="password"
           label="Password"
-          type="password"
           autoComplete="new-password"
           error={form.errors.password}
           {...form.field("password")}

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { addSets, removeSet, replaceSet, withPendingExercises } from "./workout-state.js";
 
 const squat = { id: "squat", name: "Squat" };

@@ -2,21 +2,21 @@ import { logInInputSchema } from "@fitness/shared";
 import { Link, useLocation, useNavigate } from "react-router";
 import { AuthCard } from "@/components/auth/AuthCard.jsx";
 import { FormField } from "@/components/FormField.jsx";
+import { PasswordField } from "@/components/PasswordField.jsx";
 import { Button } from "@/components/ui/button.jsx";
-import { signIn } from "@/lib/auth-client.js";
+import { useAuth } from "@/lib/auth.jsx";
 import { useForm } from "@/lib/use-form.js";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logIn } = useAuth();
 
   const form = useForm({
     schema: logInInputSchema,
     initialValues: { email: "", password: "" },
     onSubmit: async (values) => {
-      // Better Auth's client returns { data, error } instead of throwing.
-      const { error } = await signIn.email(values);
-      if (error) throw new Error(error.message ?? "Could not log in");
+      await logIn(values);
       navigate(location.state?.from ?? "/", { replace: true });
     },
   });
@@ -43,10 +43,9 @@ export function LoginPage() {
           error={form.errors.email}
           {...form.field("email")}
         />
-        <FormField
+        <PasswordField
           id="password"
           label="Password"
-          type="password"
           autoComplete="current-password"
           error={form.errors.password}
           {...form.field("password")}

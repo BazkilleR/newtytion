@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { signUp } from "../../test/auth.js";
 import { createFood } from "../../test/factories.js";
 import { listen } from "../../test/http.js";

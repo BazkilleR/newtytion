@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { createUser, createExercise as insertExercise } from "../../test/factories.js";
 import { createExercise, listExercises } from "./exercises.service.js";
 

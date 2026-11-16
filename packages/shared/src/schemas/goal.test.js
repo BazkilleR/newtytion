@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { DEFAULT_GOALS, goalsSchema, suggestMacroTargets } from "./goal.js";
 
 describe("suggestMacroTargets", () => {

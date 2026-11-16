@@ -16,10 +16,10 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: webPort,
-      // Fail instead of silently picking another port: BETTER_AUTH_URL depends on it.
+      // Fail instead of silently picking another port.
       strictPort: true,
       // The browser only talks to the Vite origin; Vite forwards /api to Express.
-      // Same origin means no CORS and first-party session cookies.
+      // Same origin means no CORS and first-party (SameSite) auth cookies.
       proxy: { "/api": `http://localhost:${apiPort}` },
     },
   };

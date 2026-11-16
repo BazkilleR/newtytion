@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Mirror Better Auth's server rules so the form can show errors before submitting.
+// Used by the api to validate and by the forms to show errors before submitting.
 export const signUpInputSchema = z.object({
   name: z.string().trim().min(1, "Enter your name").max(50),
   email: z.email("Enter a valid email").trim().toLowerCase(),

@@ -1,10 +1,8 @@
-const ORIGIN = process.env.BETTER_AUTH_URL;
-
 let counter = 0;
 
 /**
  * Sign up a fresh user over HTTP (exactly like the browser does) and return
- * the session cookie to send on later requests.
+ * the auth cookies to send on later requests.
  */
 export async function signUp(baseUrl, overrides = {}) {
   counter += 1;
@@ -15,9 +13,9 @@ export async function signUp(baseUrl, overrides = {}) {
     ...overrides,
   };
 
-  const res = await fetch(`${baseUrl}/api/auth/sign-up/email`, {
+  const res = await fetch(`${baseUrl}/api/auth/signup`, {
     method: "POST",
-    headers: { "content-type": "application/json", origin: ORIGIN },
+    headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -28,7 +26,10 @@ export async function signUp(baseUrl, overrides = {}) {
   return { user: data.user, cookie: cookieHeader(res), password: body.password };
 }
 
-/** Turn Set-Cookie response headers into a Cookie request header. */
+/**
+ * Turn Set-Cookie response headers into a Cookie request header. Unlike a
+ * browser it ignores `Path`, so every cookie is sent to every route.
+ */
 export function cookieHeader(res) {
   return res.headers
     .getSetCookie()

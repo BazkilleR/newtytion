@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "../src/db/client.js";
 import { exercises, foods, user } from "../src/db/schema/index.js";
 
-/** Insert a user row directly (no password) — enough for service tests. */
+/** Insert a user row directly (with a hash no password matches) — enough for service tests. */
 export async function createUser(overrides = {}) {
   const id = randomUUID();
   const [row] = await db
@@ -11,6 +11,7 @@ export async function createUser(overrides = {}) {
       id,
       name: "Test",
       email: `${id}@example.com`,
+      passwordHash: "unusable",
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,

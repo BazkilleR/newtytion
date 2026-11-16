@@ -4,7 +4,7 @@ import { FormField } from "@/components/FormField.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.jsx";
 import { api } from "@/lib/api.js";
-import { useSession } from "@/lib/auth-client.js";
+import { useAuth } from "@/lib/auth.jsx";
 import { useApi } from "@/lib/use-api.js";
 import { toNumber, useForm } from "@/lib/use-form.js";
 
@@ -74,7 +74,7 @@ function GoalsForm({ initial }) {
 }
 
 export function SettingsPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const goals = useApi("/goals");
 
   return (
@@ -92,7 +92,7 @@ export function SettingsPage() {
           {goals.data && <GoalsForm initial={goals.data} />}
         </CardContent>
       </Card>
-      <p className="text-sm text-muted-foreground">Signed in as {session?.user.email}</p>
+      <p className="text-sm text-muted-foreground">Signed in as {user?.email}</p>
     </div>
   );
 }

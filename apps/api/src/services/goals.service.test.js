@@ -1,5 +1,5 @@
 import { DEFAULT_GOALS } from "@fitness/shared";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { createUser } from "../../test/factories.js";
 import { getGoals, upsertGoals } from "./goals.service.js";
 

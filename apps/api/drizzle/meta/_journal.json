@@ -22,6 +22,20 @@
       "when": 1791708187672,
       "tag": "0002_weights_only_muscles",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794818629522,
+      "tag": "0003_jwt_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794818637055,
+      "tag": "0004_drop_better_auth",
+      "breakpoints": true
     }
   ]
 }

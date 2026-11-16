@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { DEFAULT_SET, formatSet, groupSetsByExercise, nextSetDefaults } from "./workout.js";
 
 const s = (weightKg, reps, extra = {}) => ({ weightKg, reps, ...extra });

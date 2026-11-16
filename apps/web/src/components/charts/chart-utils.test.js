@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { dateToTs, evenTicks, formatTick, niceTicks, paddedDomain } from "./chart-utils.js";
 
 describe("chart utils", () => {

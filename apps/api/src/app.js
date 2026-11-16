@@ -1,6 +1,5 @@
-import { toNodeHandler } from "better-auth/node";
+import cookieParser from "cookie-parser";
 import express from "express";
-import { auth } from "./auth.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { apiRouter } from "./routes/index.js";
 
@@ -10,11 +9,9 @@ export function createApp() {
 
   app.disable("x-powered-by");
 
-  // Better Auth handles sign-up/sign-in/sign-out/get-session itself and reads
-  // the raw request body, so it must be mounted BEFORE express.json().
-  app.all("/api/auth/*splat", toNodeHandler(auth));
-
   app.use(express.json({ limit: "100kb" }));
+  // Fills req.cookies; the access/refresh JWTs live in httpOnly cookies.
+  app.use(cookieParser());
 
   app.use("/api", apiRouter);
   app.use("/api", notFoundHandler);

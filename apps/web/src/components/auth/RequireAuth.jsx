@@ -1,14 +1,14 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { FullPageSpinner } from "@/components/FullPageSpinner.jsx";
-import { useSession } from "@/lib/auth-client.js";
+import { useAuth } from "@/lib/auth.jsx";
 
 /** Layout route guard: renders children only for logged-in users. */
 export function RequireAuth() {
-  const { data: session, isPending } = useSession();
+  const { user, isPending } = useAuth();
   const location = useLocation();
 
   if (isPending) return <FullPageSpinner />;
-  if (!session) {
+  if (!user) {
     // Remember where they were going so login can send them back.
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
@@ -17,9 +17,9 @@ export function RequireAuth() {
 
 /** Inverse guard for /login and /signup: logged-in users go to the app. */
 export function GuestOnly() {
-  const { data: session, isPending } = useSession();
+  const { user, isPending } = useAuth();
 
   if (isPending) return <FullPageSpinner />;
-  if (session) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/" replace />;
   return <Outlet />;
 }

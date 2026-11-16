@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { movingAverage } from "./moving-average.js";
 
 const p = (logDate, weightKg) => ({ logDate, weightKg });

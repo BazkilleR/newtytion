@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { createUser, createFood as insertFood } from "../../test/factories.js";
 import { db } from "../db/client.js";
 import { mealEntries } from "../db/schema/index.js";

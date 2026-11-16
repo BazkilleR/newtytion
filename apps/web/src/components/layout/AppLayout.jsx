@@ -1,7 +1,7 @@
 import { CalendarDays, Dumbbell, LogOut, Scale, Settings, TrendingUp } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
-import { signOut, useSession } from "@/lib/auth-client.js";
+import { useAuth } from "@/lib/auth.jsx";
 import { cn } from "@/lib/utils.js";
 
 const NAV_ITEMS = [
@@ -13,11 +13,11 @@ const NAV_ITEMS = [
 ];
 
 export function AppLayout() {
-  const { data: session } = useSession();
+  const { user, logOut } = useAuth();
   const navigate = useNavigate();
 
   async function handleLogout() {
-    await signOut();
+    await logOut();
     navigate("/login", { replace: true });
   }
 
@@ -26,7 +26,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur">
         <span className="font-semibold">Fitness Log</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">{session?.user.name}</span>
+          <span className="text-sm text-muted-foreground">{user?.name}</span>
           <Button variant="ghost" size="icon-lg" onClick={handleLogout} aria-label="Log out">
             <LogOut />
           </Button>

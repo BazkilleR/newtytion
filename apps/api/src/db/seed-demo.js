@@ -1,6 +1,6 @@
 import { addDays, suggestMacroTargets, todayIn } from "@fitness/shared";
 import { and, eq, inArray, isNull } from "drizzle-orm";
-import { auth } from "../auth.js";
+import { signUp } from "../services/auth.service.js";
 import { db } from "./client.js";
 import {
   bodyLogs,
@@ -85,9 +85,7 @@ export async function seedDemo() {
 
   // Delete + recreate: cascades remove all previous demo data.
   await db.delete(user).where(eq(user.email, DEMO_EMAIL));
-  const { user: demo } = await auth.api.signUpEmail({
-    body: { email: DEMO_EMAIL, password: DEMO_PASSWORD, name: "Demo" },
-  });
+  const demo = await signUp({ email: DEMO_EMAIL, password: DEMO_PASSWORD, name: "Demo" });
 
   await db.insert(goals).values({
     userId: demo.id,
