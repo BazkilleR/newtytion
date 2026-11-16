@@ -1,3 +1,5 @@
+"use client";
+
 import { addDays, todayIn } from "@fitness/shared";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -90,7 +92,7 @@ function LogWeightCard({ latest, onSaved }) {
   );
 }
 
-export function BodyPage() {
+export default function BodyPage() {
   const [days, setDays] = useState(30);
   const today = todayIn();
   const from = addDays(today, -(days - 1));

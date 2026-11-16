@@ -1,7 +1,10 @@
+"use client";
+
 import { addDays, todayIn } from "@fitness/shared";
 import { Dumbbell } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
 import { RangePicker } from "@/components/charts/RangePicker.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.jsx";
@@ -55,8 +58,8 @@ function MusclesCard() {
   );
 }
 
-export function WorkoutsPage() {
-  const navigate = useNavigate();
+export default function WorkoutsPage() {
+  const router = useRouter();
   const workouts = useApi("/workouts");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(null);
@@ -66,7 +69,7 @@ export function WorkoutsPage() {
     setError(null);
     try {
       const w = await api("/workouts", { method: "POST", body: { logDate: todayIn() } });
-      navigate(`/workouts/${w.id}`);
+      router.push(`/workouts/${w.id}`);
     } catch (err) {
       setError(err.message);
       setStarting(false);
@@ -100,7 +103,7 @@ export function WorkoutsPage() {
             {workouts.data.map((w) => (
               <li key={w.id}>
                 <Link
-                  to={`/workouts/${w.id}`}
+                  href={`/workouts/${w.id}`}
                   className="flex min-h-14 items-center justify-between gap-3 px-3 py-2 hover:bg-muted"
                 >
                   <span>

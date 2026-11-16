@@ -1,5 +1,8 @@
+"use client";
+
 import { CalendarDays, Dumbbell, LogOut, Scale, Settings, TrendingUp } from "lucide-react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button.jsx";
 import { useAuth } from "@/lib/auth.jsx";
 import { cn } from "@/lib/utils.js";
@@ -12,13 +15,14 @@ const NAV_ITEMS = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function AppLayout() {
+export function AppLayout({ children }) {
   const { user, logOut } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = usePathname();
 
   async function handleLogout() {
     await logOut();
-    navigate("/login", { replace: true });
+    router.replace("/login");
   }
 
   return (
@@ -33,30 +37,29 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-4 pb-24">
-        <Outlet />
-      </main>
+      <main className="flex-1 px-4 py-4 pb-24">{children}</main>
 
       {/* Bottom nav: thumb-reachable on phones */}
       <nav className="fixed inset-x-0 bottom-0 border-t bg-background pb-[env(safe-area-inset-bottom)]">
         <ul className="mx-auto flex max-w-lg">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-            <li key={to} className="flex-1">
-              <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  cn(
+          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => {
+            const isActive = pathname === to || (!end && pathname.startsWith(`${to}/`));
+            return (
+              <li key={to} className="flex-1">
+                <Link
+                  href={to}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
                     "flex h-16 flex-col items-center justify-center gap-1 text-xs",
                     isActive ? "text-foreground" : "text-muted-foreground",
-                  )
-                }
-              >
-                <Icon className="size-5" />
-                {label}
-              </NavLink>
-            </li>
-          ))}
+                  )}
+                >
+                  <Icon className="size-5" />
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </div>

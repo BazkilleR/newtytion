@@ -1,25 +1,35 @@
-import { Navigate, Outlet, useLocation } from "react-router";
+"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FullPageSpinner } from "@/components/FullPageSpinner.jsx";
 import { useAuth } from "@/lib/auth.jsx";
 
-/** Layout route guard: renders children only for logged-in users. */
-export function RequireAuth() {
+/** Layout guard: renders children only for logged-in users. */
+export function RequireAuth({ children }) {
   const { user, isPending } = useAuth();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const loggedOut = !isPending && !user;
 
-  if (isPending) return <FullPageSpinner />;
-  if (!user) {
+  useEffect(() => {
     // Remember where they were going so login can send them back.
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  }
-  return <Outlet />;
+    if (loggedOut) router.replace(`/login?from=${encodeURIComponent(pathname)}`);
+  }, [loggedOut, router, pathname]);
+
+  if (!user) return <FullPageSpinner />;
+  return children;
 }
 
 /** Inverse guard for /login and /signup: logged-in users go to the app. */
-export function GuestOnly() {
+export function GuestOnly({ children }) {
   const { user, isPending } = useAuth();
+  const router = useRouter();
 
-  if (isPending) return <FullPageSpinner />;
-  if (user) return <Navigate to="/" replace />;
-  return <Outlet />;
+  useEffect(() => {
+    if (user) router.replace("/");
+  }, [user, router]);
+
+  if (isPending || user) return <FullPageSpinner />;
+  return children;
 }

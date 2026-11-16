@@ -1,7 +1,10 @@
+"use client";
+
 import { isoDateSchema, mealTypeSchema, suggestMealType, todayIn } from "@fitness/shared";
 import { ArrowLeft, Plus, Search } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
 import { NumberStepper } from "@/components/NumberStepper.jsx";
 import { CustomFoodDialog } from "@/components/nutrition/CustomFoodDialog.jsx";
 import { MealTypePicker } from "@/components/nutrition/MealTypePicker.jsx";
@@ -75,9 +78,9 @@ function AddEntryDialog({ food, date, initialMealType, onClose, onAdded }) {
   );
 }
 
-export function AddFoodPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+export default function AddFoodPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const dateParam = searchParams.get("date");
   const date = isoDateSchema.safeParse(dateParam).success ? dateParam : todayIn();
   const mealParam = mealTypeSchema.safeParse(searchParams.get("meal"));
@@ -96,7 +99,7 @@ export function AddFoodPage() {
     <div className="grid gap-4">
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon-lg">
-          <Link to={backTo} aria-label="Back">
+          <Link href={backTo} aria-label="Back">
             <ArrowLeft />
           </Link>
         </Button>
@@ -169,7 +172,7 @@ export function AddFoodPage() {
             date={date}
             initialMealType={initialMealType}
             onClose={() => setSelected(null)}
-            onAdded={() => navigate(backTo)}
+            onAdded={() => router.push(backTo)}
           />
         )}
       </Dialog>

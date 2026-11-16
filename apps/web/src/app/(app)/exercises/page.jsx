@@ -1,11 +1,13 @@
+"use client";
+
 import { MUSCLE_GROUP_LABELS } from "@fitness/shared";
 import { ChevronRight } from "lucide-react";
-import { Link } from "react-router";
+import Link from "next/link";
 import { formatDayLabel } from "@/lib/format.js";
 import { useApi } from "@/lib/use-api.js";
 
 /** Exercises the user has trained, most recent first, linking to their e1RM history. */
-export function ExercisesPage() {
+export default function ExercisesPage() {
   const performed = useApi("/exercises/performed");
 
   return (
@@ -25,7 +27,7 @@ export function ExercisesPage() {
           {performed.data.map((e) => (
             <li key={e.id}>
               <Link
-                to={`/exercises/${e.id}`}
+                href={`/exercises/${e.id}`}
                 className="flex min-h-14 items-center gap-3 px-3 py-2 hover:bg-muted"
               >
                 <span className="flex-1">

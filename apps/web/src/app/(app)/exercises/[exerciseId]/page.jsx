@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowLeft } from "lucide-react";
-import { Link, useParams } from "react-router";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { E1rmChart } from "@/components/charts/E1rmChart.jsx";
 import { StatTile } from "@/components/charts/StatTile.jsx";
 import { Button } from "@/components/ui/button.jsx";
@@ -7,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.j
 import { formatDayLabel } from "@/lib/format.js";
 import { useApi } from "@/lib/use-api.js";
 
-export function ExerciseHistoryPage() {
+export default function ExerciseHistoryPage() {
   const { exerciseId } = useParams();
   const history = useApi(`/exercises/${exerciseId}/history`);
   const points = history.data?.points ?? [];
@@ -18,7 +21,7 @@ export function ExerciseHistoryPage() {
     <div className="grid gap-4">
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon-lg">
-          <Link to="/exercises" aria-label="Back to progress">
+          <Link href="/exercises" aria-label="Back to progress">
             <ArrowLeft />
           </Link>
         </Button>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   addDays,
   groupByMealType,
@@ -7,8 +9,9 @@ import {
   todayIn,
 } from "@fitness/shared";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router";
 import { DailySummary } from "@/components/nutrition/DailySummary.jsx";
 import { EditEntryDialog } from "@/components/nutrition/EditEntryDialog.jsx";
 import { Button } from "@/components/ui/button.jsx";
@@ -17,11 +20,12 @@ import { useApi } from "@/lib/use-api.js";
 
 /** The selected day lives in the URL (?date=YYYY-MM-DD) so back/refresh/share keep it. */
 function useSelectedDate() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const today = todayIn();
   const param = searchParams.get("date");
   const date = isoDateSchema.safeParse(param).success ? param : today;
-  const setDate = (d) => setSearchParams(d === today ? {} : { date: d });
+  const setDate = (d) => router.push(d === today ? "/" : `/?date=${d}`, { scroll: false });
   return { date, today, setDate };
 }
 
@@ -98,7 +102,7 @@ function MealSection({ mealType, entries, date, onSelect }) {
         </h2>
         <Button asChild variant="ghost" size="lg" className="h-10">
           <Link
-            to={`/food/add?date=${date}&meal=${mealType}`}
+            href={`/food/add?date=${date}&meal=${mealType}`}
             aria-label={`Add food to ${MEAL_LABELS[mealType]}`}
           >
             <Plus /> Add
@@ -134,7 +138,7 @@ function MealSection({ mealType, entries, date, onSelect }) {
   );
 }
 
-export function TodayPage() {
+export default function TodayPage() {
   const { date, today, setDate } = useSelectedDate();
   const day = useApi("/meals", { query: { date } });
   const [editing, setEditing] = useState(null);

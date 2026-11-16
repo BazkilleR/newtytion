@@ -13,7 +13,7 @@ pnpm monorepo:
 
 | Package | What |
 |---|---|
-| `apps/web` | React + Vite, React Router, Tailwind v4, shadcn/ui, Recharts |
+| `apps/web` | Next.js (App Router, client components), Tailwind v4, shadcn/ui, Recharts |
 | `apps/api` | Express 5 + Drizzle ORM + JWT auth (httpOnly cookies), plain Node (no build step) |
 | `packages/shared` | Zod schemas and pure logic shared by web and api |
 
@@ -51,7 +51,7 @@ Creates **demo@example.com / demo-password** with ~4 months of weigh-ins,
 12 weeks of progressive training and today's meals, so every chart has data.
 Re-running replaces the demo user (and only that user).
 
-Open http://localhost:5173. The web dev server proxies `/api/*` to the API, so
+Open http://localhost:5173. Next rewrites `/api/*` to the API, so
 the browser only ever sees one origin (no CORS, first-party cookies).
 
 ## Environment variables
@@ -62,8 +62,8 @@ All in the root `.env`, loaded by `apps/api/src/load-env.js` (dotenv). Variables
 |---|---|---|
 | `DATABASE_URL` | api, drizzle-kit | dev database |
 | `TEST_DATABASE_URL` | api tests | separate DB, truncated by tests |
-| `PORT` | api, vite proxy | default 3000 |
-| `WEB_PORT` | vite | default 5173 |
+| `PORT` | api, Next `/api` rewrite | default 3000 |
+| `WEB_PORT` | Next (dev / start) | default 5173 |
 | `JWT_ACCESS_SECRET` | api | ≥ 32 chars, signs access tokens |
 | `JWT_REFRESH_SECRET` | api | ≥ 32 chars, signs refresh tokens; must differ from the access secret |
 
@@ -90,7 +90,7 @@ apps/api/src
   db/               Drizzle schema, client, seed (+ seed-demo)
 apps/api/drizzle    generated SQL migrations
 apps/web/src
-  pages/            one component per route (see App.jsx)
+  app/              Next App Router: (guest)/ login + signup, (app)/ pages behind login
   components/       ui/ (shadcn), charts/, nutrition/, workouts/, auth/, layout/
   lib/              api fetch wrapper, useApi, useForm, formatting
 packages/shared/src

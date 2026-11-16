@@ -1,3 +1,5 @@
+"use client";
+
 import { goalsSchema, suggestMacroTargets } from "@fitness/shared";
 import { useState } from "react";
 import { FormField } from "@/components/FormField.jsx";
@@ -73,7 +75,7 @@ function GoalsForm({ initial }) {
   );
 }
 
-export function SettingsPage() {
+export default function SettingsPage() {
   const { user } = useAuth();
   const goals = useApi("/goals");
 

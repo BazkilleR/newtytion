@@ -1,6 +1,9 @@
+"use client";
+
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button.jsx";
 import { ExerciseCard } from "@/components/workouts/ExerciseCard.jsx";
 import { ExercisePicker } from "@/components/workouts/ExercisePicker.jsx";
@@ -10,9 +13,9 @@ import { formatDayLabel } from "@/lib/format.js";
 import { useApi } from "@/lib/use-api.js";
 import { addSets, removeSet, replaceSet, withPendingExercises } from "@/lib/workout-state.js";
 
-export function WorkoutPage() {
+export default function WorkoutPage() {
   const { workoutId } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const detail = useApi(`/workouts/${workoutId}`);
   const [pendingExercises, setPendingExercises] = useState([]);
   const [picking, setPicking] = useState(false);
@@ -22,7 +25,7 @@ export function WorkoutPage() {
       <div className="grid gap-3">
         <p className="text-destructive">{detail.error.message}</p>
         <Button asChild variant="outline">
-          <Link to="/workouts">Back to workouts</Link>
+          <Link href="/workouts">Back to workouts</Link>
         </Button>
       </div>
     );
@@ -35,14 +38,14 @@ export function WorkoutPage() {
   async function handleDelete() {
     if (!window.confirm("Delete this workout and all its sets?")) return;
     await api(`/workouts/${workout.id}`, { method: "DELETE" });
-    navigate("/workouts", { replace: true });
+    router.replace("/workouts");
   }
 
   return (
     <div className="grid gap-4">
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon-lg">
-          <Link to="/workouts" aria-label="Back to workouts">
+          <Link href="/workouts" aria-label="Back to workouts">
             <ArrowLeft />
           </Link>
         </Button>

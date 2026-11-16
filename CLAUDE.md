@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fitness Log: a personal meals + weight-training tracker. pnpm monorepo (`apps/api`, `apps/web`, `packages/shared`). See `README.md` for setup, env vars and the full API route table.
 
-**The whole project is plain JavaScript (ES modules).** No TypeScript, no JSDoc type-checking, no `typecheck` script. Runtime shapes are enforced with the Zod schemas in `packages/shared`. Don't add TanStack (Router/Query/Form), SWR or similar: the web app uses `react-router` (declarative `<Routes>`), its own `useApi`, and its own `useForm`. Ask before adding any new dependency.
+**The whole project is plain JavaScript (ES modules).** No TypeScript, no JSDoc type-checking, no `typecheck` script. Runtime shapes are enforced with the Zod schemas in `packages/shared`. Don't add TanStack (Router/Query/Form), SWR or similar: the web app is Next.js (App Router, every page a client component), with its own `useApi` and its own `useForm`. Ask before adding any new dependency.
 
 ## Commands
 
@@ -12,7 +12,7 @@ Run from the repo root (Node 24+, pnpm 10):
 
 ```bash
 docker compose up -d   # Postgres 16 on :5432; creates `fitness` and `fitness_test`
-pnpm dev               # api :3000 (node --watch) + web :5173 (Vite, proxies /api → api)
+pnpm dev               # api :3000 (node --watch) + web :5173 (Next, rewrites /api → api)
 pnpm lint              # Biome lint + format check (pnpm lint:fix to apply)
 pnpm test              # Jest in every package; api tests need Postgres running
 pnpm build             # web production build (also catches broken imports)
@@ -44,7 +44,7 @@ Biome skips `apps/web/src/components/ui` (shadcn-generated) and `drizzle/meta`.
 4. Services (`services/*.service.js`) hold the queries and business logic. **Every query is scoped to the `userId` argument**, never to a user id from the request (Zod strips unknown keys, so a `userId` in the body is dropped). Foods and exercises with `user_id IS NULL` are global and visible to everyone, but users can only modify their own.
 5. Errors: services throw `AppError` helpers from `lib/errors.js` (`notFound`, `forbidden`, `conflict`). `middleware/error-handler.js` maps `AppError`, `ZodError` (400 `VALIDATION_ERROR`) and bad JSON to `{ error: { code, message } }`. Postgres constraint errors are detected with `pgErrorCode()` in `lib/db-errors.js` (Drizzle wraps the pg error in `cause`).
 
-Env: one `.env` at the repo root, loaded by `apps/api/src/load-env.js` (used by the api, drizzle-kit and jest) and validated in `src/env.js`. Vite reads `PORT` / `WEB_PORT` from the same file. `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` sign the two token types; keep them different so one can't pass as the other.
+Env: one `.env` at the repo root, loaded by `apps/api/src/load-env.js` (used by the api, drizzle-kit and jest) and validated in `src/env.js`. `apps/web/scripts/next.js` (wraps the `next` CLI for dev/build/start) loads the same file, listens on `WEB_PORT` and passes the api's `PORT` to `next.config.js` as `API_PORT` (Next overwrites `PORT` with its own). `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` sign the two token types; keep them different so one can't pass as the other.
 
 ### Auth
 
@@ -60,7 +60,7 @@ Drizzle uses `casing: "snake_case"` (in both the client and `drizzle.config.js`)
 
 ### Web
 
-- `src/App.jsx` defines all routes. `<RequireAuth>` / `<GuestOnly>` are layout routes built on `useAuth()` from `lib/auth.jsx` (`AuthProvider` in `main.jsx` loads the user with `GET /api/me`). Chart pages (Recharts) are lazy-loaded.
+- Routes are files under `src/app/` (Next App Router). Pages are `"use client"` and load data in the browser through the api; there are no Server Components fetching data, because the access cookie's path is `/api`. Route groups: `(guest)/layout.jsx` wraps login/signup in `<GuestOnly>`, `(app)/layout.jsx` wraps everything else in `<RequireAuth>` + `<AppLayout>`. Both guards use `useAuth()` from `lib/auth.jsx` (`AuthProvider` in `app/layout.jsx` loads the user with `GET /api/me`) and redirect with `router.replace`; `RequireAuth` sends `?from=<path>` so login can return there. Use `next/link` and `next/navigation` (`useRouter`, `useParams`, `useSearchParams`). Don't create `src/pages/`: Next would treat it as the Pages Router.
 - `lib/api.js` `api(path, { method, body, query })` adds the `/api` prefix and throws `ApiError` with the server's `code` / `message`. On a 401 (outside `/auth/*`) it calls `/api/auth/refresh` once (shared by concurrent requests), retries, and if still 401 tells `AuthProvider` the user is logged out. `lib/use-api.js` `useApi` fetches on mount or input change, aborts stale requests, and exposes `setData` so a page can patch local state with a mutation's response instead of refetching.
 - `lib/use-form.js` `useForm({ schema, initialValues, prepare, onSubmit })`: controlled inputs via `field(name)`, with errors from the shared Zod schema. `prepare` converts input strings (e.g. `toNumber`) before validation.
 - UI is Tailwind v4 + shadcn (`components.json`, JS not TSX, `@/` alias → `src/`). The app is mobile-first.
