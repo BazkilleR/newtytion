@@ -28,7 +28,7 @@ pnpm --filter @fitness/api test src/services/meals.service.test.js
 pnpm --filter @fitness/shared test -t "movingAverage"
 ```
 
-CI (`.github/workflows/ci.yml`) runs `pnpm lint`, `pnpm test`, `pnpm build`, so run all three before committing.
+CI (`.github/workflows/ci.yml`) runs three parallel jobs: `pnpm lint`; `pnpm test` against Postgres, plus a check that `pnpm db:generate` produces no new migration and a `pnpm db:seed --demo` run done twice; and `pnpm build`. Run lint, test and build before committing, and commit the migration whenever you change the schema.
 
 Biome skips `apps/web/src/components/ui` (shadcn-generated) and `drizzle/meta`.
 
