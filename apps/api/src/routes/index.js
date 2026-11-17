@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/require-auth.js";
+import { authRouter } from "./auth.js";
 import { bodyLogsRouter } from "./body-logs.js";
 import { exercisesRouter } from "./exercises.js";
 import { foodsRouter } from "./foods.js";
@@ -13,6 +14,7 @@ export const apiRouter = Router();
 
 // Public
 apiRouter.use("/health", healthRouter);
+apiRouter.use("/auth", authRouter);
 
 // Everything below requires a logged-in user
 apiRouter.use(requireAuth);

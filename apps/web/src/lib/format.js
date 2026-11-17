@@ -7,13 +7,6 @@ export const MEAL_LABELS = {
   snack: "Snack",
 };
 
-export const ACTIVITY_LABELS = {
-  weights: "Weights",
-  running: "Running",
-  judo: "Judo",
-  other: "Other",
-};
-
 export const formatKcal = (n) => Math.round(n).toLocaleString("en-US");
 
 /** One decimal at most: 40.6, 36 */

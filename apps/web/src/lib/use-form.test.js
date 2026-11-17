@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { z } from "zod";
 import { fieldErrorsFrom, toNumber } from "./use-form.js";
 

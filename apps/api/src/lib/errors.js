@@ -17,3 +17,6 @@ export const forbidden = (message = "You cannot modify this resource") =>
   new AppError(403, "FORBIDDEN", message);
 
 export const conflict = (code, message) => new AppError(409, code, message);
+
+export const unauthorized = (message = "You need to log in") =>
+  new AppError(401, "UNAUTHORIZED", message);

@@ -55,10 +55,12 @@ export const mealEntries = pgTable(
     // DATE in the user's local timezone; mode "string" avoids JS Date shifting it.
     logDate: date({ mode: "string" }).notNull(),
     mealType: mealTypeEnum().notNull(),
-    // restrict: deleting a food that is in someone's history is an error, not silent data loss
+    // Deleting a food that is in someone's history is an error, not silent data loss.
+    // "no action" + DEFERRABLE INITIALLY DEFERRED (drizzle/0006, Drizzle can't express it):
+    // checked at commit, so deleting a user still cascades to their foods and entries.
     foodId: uuid()
       .notNull()
-      .references(() => foods.id, { onDelete: "restrict" }),
+      .references(() => foods.id, { onDelete: "no action" }),
     /** Number of servings */
     quantity: num(6, 2).notNull(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),

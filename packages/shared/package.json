@@ -7,12 +7,16 @@
     ".": "./src/index.js"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "NODE_OPTIONS='--experimental-vm-modules --disable-warning=ExperimentalWarning' jest"
   },
   "dependencies": {
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "vitest": "^5.0.3"
+    "@jest/globals": "^30.5.2",
+    "jest": "^30.5.2"
+  },
+  "jest": {
+    "transform": {}
   }
 }

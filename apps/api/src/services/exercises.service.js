@@ -11,6 +11,7 @@ export function toExercise(row) {
     id: row.id,
     name: row.name,
     muscleGroup: row.muscleGroup,
+    secondaryMuscles: row.secondaryMuscles,
     isCustom: row.userId !== null,
   };
 }

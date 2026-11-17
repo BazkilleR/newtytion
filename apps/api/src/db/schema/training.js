@@ -13,7 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.js";
-import { activityTypeEnum, muscleGroupEnum } from "./enums.js";
+import { muscleGroupEnum } from "./enums.js";
 
 /** user_id NULL = global (seeded) exercise. */
 export const exercises = pgTable(
@@ -23,6 +23,7 @@ export const exercises = pgTable(
     userId: text().references(() => user.id, { onDelete: "cascade" }),
     name: text().notNull(),
     muscleGroup: muscleGroupEnum().notNull(),
+    secondaryMuscles: muscleGroupEnum().array().notNull().default(sql`'{}'`),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
@@ -39,7 +40,6 @@ export const workouts = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     logDate: date({ mode: "string" }).notNull(),
-    activityType: activityTypeEnum().notNull(),
     durationMin: integer(),
     note: text(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
@@ -55,9 +55,12 @@ export const workoutSets = pgTable(
     workoutId: uuid()
       .notNull()
       .references(() => workouts.id, { onDelete: "cascade" }),
+    // An exercise with logged sets can't be deleted. "no action" + DEFERRABLE INITIALLY
+    // DEFERRED (drizzle/0006, Drizzle can't express it): checked at commit, so deleting a
+    // user still cascades to their custom exercises and the sets that use them.
     exerciseId: uuid()
       .notNull()
-      .references(() => exercises.id, { onDelete: "restrict" }),
+      .references(() => exercises.id, { onDelete: "no action" }),
     setNo: integer().notNull(),
     weightKg: numeric({ precision: 6, scale: 2, mode: "number" }).notNull(),
     reps: integer().notNull(),

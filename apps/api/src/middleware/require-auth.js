@@ -1,18 +1,18 @@
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../auth.js";
-import { AppError } from "../lib/errors.js";
+import { ACCESS_COOKIE } from "../lib/auth-cookies.js";
+import { unauthorized } from "../lib/errors.js";
+import { verifyAccessToken } from "../lib/tokens.js";
 
 /**
- * Resolves the session from the request cookie and exposes the user id as
+ * Verifies the access token cookie and exposes the user id as
  * `res.locals.userId`. Every route after this middleware must scope its
  * queries to that id — never to a user_id coming from the request body.
+ *
+ * No DB lookup: the JWT signature is the proof. When the token expires the
+ * client calls POST /api/auth/refresh and retries.
  */
-export async function requireAuth(req, res, next) {
-  const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
-  if (!session) {
-    throw new AppError(401, "UNAUTHORIZED", "You need to log in");
-  }
-  res.locals.userId = session.user.id;
-  res.locals.user = session.user;
+export function requireAuth(req, res, next) {
+  const payload = verifyAccessToken(req.cookies[ACCESS_COOKIE]);
+  if (!payload) throw unauthorized();
+  res.locals.userId = payload.sub;
   next();
 }

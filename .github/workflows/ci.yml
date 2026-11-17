@@ -4,32 +4,21 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch/PR cancels the run that's still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  check:
+  lint:
+    name: Lint (Biome)
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: fitness
-          POSTGRES_PASSWORD: fitness
-          POSTGRES_DB: fitness_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U fitness -d fitness_test"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 10
-
-    env:
-      DATABASE_URL: postgres://fitness:fitness@localhost:5432/fitness_test
-      TEST_DATABASE_URL: postgres://fitness:fitness@localhost:5432/fitness_test
-      BETTER_AUTH_SECRET: ci-only-secret-that-is-at-least-32-chars
-      BETTER_AUTH_URL: http://localhost:5173
-
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -39,5 +28,73 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fitness
+          POSTGRES_PASSWORD: fitness
+          POSTGRES_DB: fitness_test
+          TZ: UTC
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fitness -d fitness_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    # No .env file in CI: these take its place (see .env.example).
+    env:
+      DATABASE_URL: postgres://fitness:fitness@localhost:5432/fitness_test
+      TEST_DATABASE_URL: postgres://fitness:fitness@localhost:5432/fitness_test
+      JWT_ACCESS_SECRET: ci-only-access-secret-at-least-32-chars
+      JWT_REFRESH_SECRET: ci-only-refresh-secret-at-least-32-chars
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Fails when apps/api/src/db/schema was changed without `pnpm db:generate`.
+      - name: Migrations match the schema
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain apps/api/drizzle)" ]; then
+            git status --porcelain apps/api/drizzle
+            echo "::error::Schema changed without a migration. Run 'pnpm db:generate' and commit the result."
+            exit 1
+          fi
+
       - run: pnpm test
+
+      # seed.js itself has no unit test: run it for real, twice, to prove it's idempotent.
+      - name: Migrate and seed (smoke test)
+        run: |
+          pnpm db:migrate
+          pnpm db:seed --demo
+          pnpm db:seed --demo
+
+  build:
+    name: Build (web)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build

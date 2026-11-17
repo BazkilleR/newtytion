@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { signUp } from "../../test/auth.js";
 import { createFood } from "../../test/factories.js";
-import { listen } from "../../test/http.js";
+import { client, listen } from "../../test/http.js";
 import { createApp } from "../app.js";
 
 let server;
@@ -21,6 +21,86 @@ const json = (cookie, method, body) => ({
 });
 
 describe("meals routes", () => {
+  it("logs, reads, updates and deletes an entry", async () => {
+    const { cookie } = await signUp(server.url);
+    const api = client(server.url, cookie);
+    const food = await createFood(null, { name: "Rice", kcal: 200, proteinG: 4, carbG: 44 });
+
+    const created = await api.post("/api/meals", {
+      logDate: "2026-10-06",
+      mealType: "lunch",
+      foodId: food.id,
+      quantity: 1.5,
+    });
+    expect(created.status).toBe(201);
+    expect(created.body).toMatchObject({
+      logDate: "2026-10-06",
+      mealType: "lunch",
+      quantity: 1.5,
+      food: { id: food.id, name: "Rice", isCustom: false },
+    });
+    const id = created.body.id;
+
+    const day = await api.get("/api/meals?date=2026-10-06");
+    expect(day.status).toBe(200);
+    expect(day.body).toMatchObject({
+      date: "2026-10-06",
+      entries: [{ id }],
+      totals: { kcal: 300, proteinG: 6, carbG: 66 },
+      goals: { kcalTarget: expect.any(Number) },
+    });
+
+    const patched = await api.patch(`/api/meals/${id}`, { mealType: "dinner", quantity: 2 });
+    expect(patched.status).toBe(200);
+    expect(patched.body).toMatchObject({ id, mealType: "dinner", quantity: 2 });
+
+    expect((await api.delete(`/api/meals/${id}`)).status).toBe(204);
+    expect((await api.get("/api/meals?date=2026-10-06")).body.entries).toEqual([]);
+    expect((await api.delete(`/api/meals/${id}`)).status).toBe(404);
+  });
+
+  it("404s when logging a food that doesn't exist", async () => {
+    const { cookie } = await signUp(server.url);
+    const res = await client(server.url, cookie).post("/api/meals", {
+      logDate: "2026-10-06",
+      mealType: "lunch",
+      foodId: "00000000-0000-4000-8000-000000000000",
+      quantity: 1,
+    });
+    expect(res.status).toBe(404);
+    expect(res.body.error.message).toBe("Food not found");
+  });
+
+  it("can't update or delete another user's entry", async () => {
+    const alice = client(server.url, (await signUp(server.url)).cookie);
+    const bob = client(server.url, (await signUp(server.url)).cookie);
+    const food = await createFood(null);
+    const { body: entry } = await alice.post("/api/meals", {
+      logDate: "2026-10-06",
+      mealType: "lunch",
+      foodId: food.id,
+      quantity: 1,
+    });
+
+    expect((await bob.patch(`/api/meals/${entry.id}`, { quantity: 9 })).status).toBe(404);
+    expect((await bob.delete(`/api/meals/${entry.id}`)).status).toBe(404);
+    expect((await alice.get("/api/meals?date=2026-10-06")).body.entries[0].quantity).toBe(1);
+  });
+
+  it("rejects an invalid patch", async () => {
+    const api = client(server.url, (await signUp(server.url)).cookie);
+    const food = await createFood(null);
+    const { body: entry } = await api.post("/api/meals", {
+      logDate: "2026-10-06",
+      mealType: "lunch",
+      foodId: food.id,
+      quantity: 1,
+    });
+    for (const patch of [{ quantity: 0 }, { quantity: 101 }, { mealType: "brunch" }]) {
+      expect((await api.patch(`/api/meals/${entry.id}`, patch)).status).toBe(400);
+    }
+  });
+
   it("ignores a userId in the body and logs to the session user", async () => {
     const alice = await signUp(server.url);
     const bob = await signUp(server.url);

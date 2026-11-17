@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { createExercise, createUser } from "../../test/factories.js";
 import { getExerciseHistory, listPerformedExercises } from "./exercises.service.js";
 import { addSet, createWorkout } from "./workouts.service.js";
 
 async function session(userId, logDate, exerciseId, sets) {
-  const w = await createWorkout(userId, { logDate, activityType: "weights" });
+  const w = await createWorkout(userId, { logDate });
   for (const [weightKg, reps] of sets) await addSet(userId, w.id, { exerciseId, weightKg, reps });
   return w;
 }

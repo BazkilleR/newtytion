@@ -1,8 +1,8 @@
 import { Router } from "express";
+import * as authService from "../services/auth.service.js";
 
 export const meRouter = Router();
 
-meRouter.get("/", (_req, res) => {
-  const { id, name, email, createdAt } = res.locals.user;
-  res.json({ id, name, email, createdAt });
+meRouter.get("/", async (_req, res) => {
+  res.json(await authService.getUser(res.locals.userId));
 });

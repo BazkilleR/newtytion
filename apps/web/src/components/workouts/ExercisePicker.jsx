@@ -10,12 +10,47 @@ import { useApi } from "@/lib/use-api.js";
 import { useForm } from "@/lib/use-form.js";
 import { cn } from "@/lib/utils.js";
 
+function MusclePill({ muscle, pressed, onClick }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        "h-9 rounded-full border px-3 text-sm",
+        pressed && "border-foreground bg-foreground text-background",
+      )}
+    >
+      {MUSCLE_GROUP_LABELS[muscle]}
+    </button>
+  );
+}
+
 function NewExerciseForm({ initialName, onCreated }) {
   const form = useForm({
     schema: createExerciseInputSchema,
-    initialValues: { name: initialName, muscleGroup: "legs" },
+    initialValues: { name: initialName, muscleGroup: "quads", secondaryMuscles: [] },
     onSubmit: async (input) => onCreated(await api("/exercises", { method: "POST", body: input })),
   });
+  const { muscleGroup, secondaryMuscles } = form.values;
+
+  function choosePrimary(muscle) {
+    form.setValue("muscleGroup", muscle);
+    // A muscle can't be both primary and secondary.
+    form.setValue(
+      "secondaryMuscles",
+      secondaryMuscles.filter((m) => m !== muscle),
+    );
+  }
+
+  function toggleSecondary(muscle) {
+    form.setValue(
+      "secondaryMuscles",
+      secondaryMuscles.includes(muscle)
+        ? secondaryMuscles.filter((m) => m !== muscle)
+        : [...secondaryMuscles, muscle],
+    );
+  }
 
   return (
     <form onSubmit={form.handleSubmit} noValidate className="grid gap-3 rounded-lg border p-3">
@@ -25,22 +60,38 @@ function NewExerciseForm({ initialName, onCreated }) {
         error={form.errors.name}
         {...form.field("name")}
       />
-      <div className="flex flex-wrap gap-1.5">
-        {MUSCLE_GROUPS.map((g) => (
-          <button
-            key={g}
-            type="button"
-            aria-pressed={form.values.muscleGroup === g}
-            onClick={() => form.setValue("muscleGroup", g)}
-            className={cn(
-              "h-9 rounded-full border px-3 text-sm",
-              form.values.muscleGroup === g && "border-foreground bg-foreground text-background",
-            )}
-          >
-            {MUSCLE_GROUP_LABELS[g]}
-          </button>
-        ))}
-      </div>
+      <fieldset className="grid gap-1.5">
+        <legend className="mb-1.5 text-sm font-medium">Main muscle</legend>
+        <div className="flex flex-wrap gap-1.5">
+          {MUSCLE_GROUPS.map((m) => (
+            <MusclePill
+              key={m}
+              muscle={m}
+              pressed={muscleGroup === m}
+              onClick={() => choosePrimary(m)}
+            />
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="grid gap-1.5">
+        <legend className="mb-1.5 text-sm font-medium">
+          Also works{" "}
+          <span className="font-normal text-muted-foreground">(optional, half a set)</span>
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {MUSCLE_GROUPS.filter((m) => m !== muscleGroup).map((m) => (
+            <MusclePill
+              key={m}
+              muscle={m}
+              pressed={secondaryMuscles.includes(m)}
+              onClick={() => toggleSecondary(m)}
+            />
+          ))}
+        </div>
+        {form.errors.secondaryMuscles && (
+          <p className="text-sm text-destructive">{form.errors.secondaryMuscles}</p>
+        )}
+      </fieldset>
       {form.formError && <p className="text-sm text-destructive">{form.formError}</p>}
       <Button type="submit" className="h-11" disabled={form.isSubmitting}>
         Create and add

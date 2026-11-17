@@ -3,6 +3,7 @@ import {
   createSetInputSchema,
   createWorkoutInputSchema,
   idParamsSchema,
+  muscleSetsQuerySchema,
   setParamsSchema,
   updateSetInputSchema,
   updateWorkoutInputSchema,
@@ -21,6 +22,12 @@ workoutsRouter.get("/", async (req, res) => {
 workoutsRouter.post("/", async (req, res) => {
   const input = createWorkoutInputSchema.parse(req.body);
   res.status(201).json(await workoutsService.createWorkout(res.locals.userId, input));
+});
+
+// Before "/:id" so "muscle-sets" isn't parsed as an id.
+workoutsRouter.get("/muscle-sets", async (req, res) => {
+  const query = muscleSetsQuerySchema.parse(req.query);
+  res.json(await workoutsService.getMuscleSets(res.locals.userId, query));
 });
 
 workoutsRouter.get("/:id", async (req, res) => {

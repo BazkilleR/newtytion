@@ -1,8 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "@jest/globals";
 import { createUser, createFood as insertFood } from "../../test/factories.js";
 import { db } from "../db/client.js";
 import { mealEntries } from "../db/schema/index.js";
-import { createFood, deleteFood, searchFoods, updateFood } from "./foods.service.js";
+import {
+  createFood,
+  deleteFood,
+  findVisibleFood,
+  searchFoods,
+  toFood,
+  updateFood,
+} from "./foods.service.js";
 
 const search = (userId, q) => searchFoods(userId, { q, limit: 50 });
 const names = (list) => list.map((f) => f.name);
@@ -37,6 +44,48 @@ describe("searchFoods", () => {
     expect(names(await search(me.id, "%"))).toEqual(["Milk 100%"]);
     expect(await search(me.id, "_")).toEqual([]);
   });
+
+  it("respects the limit", async () => {
+    const me = await createUser();
+    for (const name of ["A", "B", "C"]) await insertFood(null, { name });
+    expect(names(await searchFoods(me.id, { limit: 2 }))).toEqual(["A", "B"]);
+  });
+});
+
+describe("findVisibleFood", () => {
+  it("finds global and own foods, never another user's or a missing one", async () => {
+    const me = await createUser();
+    const other = await createUser();
+    const global = await insertFood(null);
+    const mine = await insertFood(me.id);
+    const theirs = await insertFood(other.id);
+
+    expect((await findVisibleFood(me.id, global.id)).id).toBe(global.id);
+    expect((await findVisibleFood(me.id, mine.id)).id).toBe(mine.id);
+    expect(await findVisibleFood(me.id, theirs.id)).toBeNull();
+    expect(await findVisibleFood(me.id, "00000000-0000-4000-8000-000000000000")).toBeNull();
+  });
+});
+
+describe("toFood", () => {
+  it("hides user_id and createdAt, exposing isCustom instead", async () => {
+    const me = await createUser();
+    const row = await insertFood(me.id, { name: "Shake" });
+    const food = toFood(row);
+    expect(Object.keys(food).sort()).toEqual([
+      "carbG",
+      "fatG",
+      "id",
+      "isCustom",
+      "kcal",
+      "name",
+      "proteinG",
+      "servingSize",
+      "servingUnit",
+    ]);
+    expect(food.isCustom).toBe(true);
+    expect(toFood({ ...row, userId: null }).isCustom).toBe(false);
+  });
 });
 
 describe("createFood", () => {
@@ -64,6 +113,21 @@ describe("updateFood / deleteFood", () => {
     expect((await updateFood(me.id, food.id, { kcal: 150 })).kcal).toBe(150);
     await deleteFood(me.id, food.id);
     expect(await search(me.id)).toEqual([]);
+  });
+
+  it("returns the food unchanged for an empty update", async () => {
+    const me = await createUser();
+    const food = await insertFood(me.id, { name: "Same", kcal: 100 });
+    expect(await updateFood(me.id, food.id, {})).toMatchObject({ name: "Same", kcal: 100 });
+  });
+
+  it("checks ownership even for an empty update", async () => {
+    const me = await createUser();
+    const other = await createUser();
+    const theirs = await insertFood(other.id);
+    const global = await insertFood(null);
+    await expect(updateFood(me.id, theirs.id, {})).rejects.toMatchObject({ status: 404 });
+    await expect(updateFood(me.id, global.id, {})).rejects.toMatchObject({ status: 403 });
   });
 
   it("refuses to change global foods (403)", async () => {
