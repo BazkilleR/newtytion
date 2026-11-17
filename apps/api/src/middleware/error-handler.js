@@ -6,7 +6,8 @@ function send(res, status, code, message) {
 }
 
 export function notFoundHandler(req, res) {
-  send(res, 404, "NOT_FOUND", `Route ${req.method} ${req.path} not found`);
+  // req.path is relative to the mount point ("/api"), so put baseUrl back in front.
+  send(res, 404, "NOT_FOUND", `Route ${req.method} ${req.baseUrl}${req.path} not found`);
 }
 
 // Express 5 forwards rejected promises from async handlers here automatically,
@@ -27,6 +28,11 @@ export function errorHandler(err, _req, res, _next) {
   // Malformed JSON body from express.json()
   if (err?.type === "entity.parse.failed") {
     return send(res, 400, "INVALID_JSON", "Request body is not valid JSON");
+  }
+
+  // Body over the express.json() size limit
+  if (err?.type === "entity.too.large") {
+    return send(res, 413, "PAYLOAD_TOO_LARGE", "Request body is too large");
   }
 
   console.error(err);

@@ -92,6 +92,24 @@ describe("getDailyMeals", () => {
 });
 
 describe("createMealEntry", () => {
+  it("logs a global or the user's own food and returns it with the food", async () => {
+    const { me } = await setup();
+    const shake = await createFood(me.id, { name: "My shake", kcal: 250 });
+    const entry = await createMealEntry(me.id, {
+      logDate: DAY,
+      mealType: "snack",
+      foodId: shake.id,
+      quantity: 0.5,
+    });
+    expect(entry).toEqual({
+      id: expect.any(String),
+      logDate: DAY,
+      mealType: "snack",
+      quantity: 0.5,
+      food: expect.objectContaining({ id: shake.id, name: "My shake", isCustom: true }),
+    });
+  });
+
   it("can't use another user's custom food", async () => {
     const { me } = await setup();
     const other = await createUser();
@@ -136,6 +154,26 @@ describe("updateMealEntry / deleteMealEntry", () => {
     });
     await expect(deleteMealEntry(me.id, theirs.id)).rejects.toMatchObject({ status: 404 });
     expect((await getDailyMeals(other.id, DAY)).entries[0].quantity).toBe(1);
+  });
+
+  it("returns the entry unchanged for an empty update, but still 404s for others'", async () => {
+    const { me, kaprao } = await setup();
+    const other = await createUser();
+    const entry = await createMealEntry(me.id, {
+      logDate: DAY,
+      mealType: "lunch",
+      foodId: kaprao.id,
+      quantity: 1,
+    });
+    expect(await updateMealEntry(me.id, entry.id, {})).toEqual(entry);
+    await expect(updateMealEntry(other.id, entry.id, {})).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("404s when deleting an entry that doesn't exist", async () => {
+    const { me } = await setup();
+    await expect(
+      deleteMealEntry(me.id, "00000000-0000-4000-8000-000000000000"),
+    ).rejects.toMatchObject({ status: 404, message: "Meal entry not found" });
   });
 
   it("deletes the user's own entry", async () => {

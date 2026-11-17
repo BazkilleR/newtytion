@@ -55,9 +55,12 @@ export const workoutSets = pgTable(
     workoutId: uuid()
       .notNull()
       .references(() => workouts.id, { onDelete: "cascade" }),
+    // An exercise with logged sets can't be deleted. "no action" + DEFERRABLE INITIALLY
+    // DEFERRED (drizzle/0006, Drizzle can't express it): checked at commit, so deleting a
+    // user still cascades to their custom exercises and the sets that use them.
     exerciseId: uuid()
       .notNull()
-      .references(() => exercises.id, { onDelete: "restrict" }),
+      .references(() => exercises.id, { onDelete: "no action" }),
     setNo: integer().notNull(),
     weightKg: numeric({ precision: 6, scale: 2, mode: "number" }).notNull(),
     reps: integer().notNull(),

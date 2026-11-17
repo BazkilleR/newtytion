@@ -1,9 +1,47 @@
-import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import jwt from "jsonwebtoken";
 import { cookieHeader, signUp } from "../../test/auth.js";
 import { listen } from "../../test/http.js";
 import { createApp } from "../app.js";
 import { env } from "../env.js";
+import { AppError } from "../lib/errors.js";
+import { signAccessToken, signRefreshToken } from "../lib/tokens.js";
+import { requireAuth } from "./require-auth.js";
+
+describe("requireAuth (unit)", () => {
+  const run = (cookies) => {
+    const res = { locals: {} };
+    const next = jest.fn();
+    requireAuth({ cookies }, res, next);
+    return { res, next };
+  };
+
+  it("puts the token's subject in res.locals.userId and calls next", () => {
+    const { res, next } = run({ access_token: signAccessToken("user-1") });
+    expect(res.locals.userId).toBe("user-1");
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("throws 401 without calling next when the cookie is missing or invalid", () => {
+    for (const cookies of [
+      {},
+      { access_token: "junk" },
+      { access_token: signRefreshToken("user-1", "00000000-0000-4000-8000-000000000000") },
+      // The refresh cookie alone doesn't count
+      { refresh_token: signAccessToken("user-1") },
+    ]) {
+      const next = jest.fn();
+      const res = { locals: {} };
+      expect(() => requireAuth({ cookies }, res, next)).toThrow(AppError);
+      expect(() => requireAuth({ cookies }, res, next)).toThrow(
+        expect.objectContaining({ status: 401, code: "UNAUTHORIZED" }),
+      );
+      expect(next).not.toHaveBeenCalled();
+      expect(res.locals.userId).toBeUndefined();
+    }
+  });
+});
 
 let server;
 
