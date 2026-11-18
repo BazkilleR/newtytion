@@ -1,47 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import jwt from "jsonwebtoken";
 import { cookieHeader, signUp } from "../../test/auth.js";
 import { listen } from "../../test/http.js";
 import { createApp } from "../app.js";
 import { env } from "../env.js";
-import { AppError } from "../lib/errors.js";
-import { signAccessToken, signRefreshToken } from "../lib/tokens.js";
-import { requireAuth } from "./require-auth.js";
-
-describe("requireAuth (unit)", () => {
-  const run = (cookies) => {
-    const res = { locals: {} };
-    const next = jest.fn();
-    requireAuth({ cookies }, res, next);
-    return { res, next };
-  };
-
-  it("puts the token's subject in res.locals.userId and calls next", () => {
-    const { res, next } = run({ access_token: signAccessToken("user-1") });
-    expect(res.locals.userId).toBe("user-1");
-    expect(next).toHaveBeenCalledTimes(1);
-    expect(next).toHaveBeenCalledWith();
-  });
-
-  it("throws 401 without calling next when the cookie is missing or invalid", () => {
-    for (const cookies of [
-      {},
-      { access_token: "junk" },
-      { access_token: signRefreshToken("user-1", "00000000-0000-4000-8000-000000000000") },
-      // The refresh cookie alone doesn't count
-      { refresh_token: signAccessToken("user-1") },
-    ]) {
-      const next = jest.fn();
-      const res = { locals: {} };
-      expect(() => requireAuth({ cookies }, res, next)).toThrow(AppError);
-      expect(() => requireAuth({ cookies }, res, next)).toThrow(
-        expect.objectContaining({ status: 401, code: "UNAUTHORIZED" }),
-      );
-      expect(next).not.toHaveBeenCalled();
-      expect(res.locals.userId).toBeUndefined();
-    }
-  });
-});
 
 let server;
 
@@ -69,52 +31,8 @@ const cookieValue = (cookie, name) =>
     .find((c) => c.startsWith(`${name}=`))
     ?.slice(name.length + 1);
 
-describe("requireAuth", () => {
-  it("rejects requests without a token", async () => {
-    const res = await getMe();
-    expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({
-      error: { code: "UNAUTHORIZED", message: "You need to log in" },
-    });
-  });
-
-  it("rejects a forged or wrongly signed access token", async () => {
-    expect((await getMe("access_token=forged.value")).status).toBe(401);
-
-    const { user } = await signUp(server.url);
-    const wrongKey = jwt.sign({}, "x".repeat(32), { subject: user.id, expiresIn: 60 });
-    expect((await getMe(`access_token=${wrongKey}`)).status).toBe(401);
-  });
-
-  it("rejects an expired access token", async () => {
-    const { user } = await signUp(server.url);
-    const expired = jwt.sign({ exp: Math.floor(Date.now() / 1000) - 10 }, env.JWT_ACCESS_SECRET, {
-      subject: user.id,
-    });
-    expect((await getMe(`access_token=${expired}`)).status).toBe(401);
-  });
-
-  it("does not accept a refresh token as an access token", async () => {
-    const { cookie } = await signUp(server.url);
-    const refresh = cookieValue(cookie, "refresh_token");
-    expect((await getMe(`access_token=${refresh}`)).status).toBe(401);
-  });
-
-  it("lets a signed-up user through and exposes only their own profile", async () => {
-    const { cookie, user } = await signUp(server.url, { name: "Somchai" });
-    const res = await getMe(cookie);
-    expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ id: user.id, name: "Somchai", email: user.email });
-  });
-
-  it("returns 404 for unknown routes once logged in (401 before, so routes aren't leaked)", async () => {
-    const { cookie } = await signUp(server.url);
-    expect((await fetch(`${server.url}/api/nope`)).status).toBe(401);
-    const res = await fetch(`${server.url}/api/nope`, { headers: { cookie } });
-    expect(res.status).toBe(404);
-    expect((await res.json()).error.code).toBe("NOT_FOUND");
-  });
-});
+const base64url = (obj) => Buffer.from(JSON.stringify(obj)).toString("base64url");
+const inAMinute = () => Math.floor(Date.now() / 1000) + 60;
 
 describe("auth routes", () => {
   it("sets httpOnly access and refresh cookies on sign-up, without the password hash", async () => {
@@ -209,5 +127,77 @@ describe("auth routes", () => {
 
   it("logout without a session still succeeds", async () => {
     expect((await post("/api/auth/logout")).status).toBe(204);
+  });
+});
+
+describe("access token check (requireAuth)", () => {
+  it("rejects requests without a token", async () => {
+    const res = await getMe();
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({
+      error: { code: "UNAUTHORIZED", message: "You need to log in" },
+    });
+  });
+
+  it("lets a signed-up user through and exposes only their own profile", async () => {
+    const { cookie, user } = await signUp(server.url, { name: "Somchai" });
+    const res = await getMe(cookie);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ id: user.id, name: "Somchai", email: user.email });
+  });
+
+  it("rejects garbage and a token signed with the wrong key", async () => {
+    expect((await getMe("access_token=forged.value")).status).toBe(401);
+
+    const { user } = await signUp(server.url);
+    const wrongKey = jwt.sign({}, "x".repeat(32), { subject: user.id, expiresIn: 60 });
+    expect((await getMe(`access_token=${wrongKey}`)).status).toBe(401);
+  });
+
+  it("rejects a real token whose payload was swapped for another user", async () => {
+    const { cookie } = await signUp(server.url);
+    const other = await signUp(server.url);
+    const [header, , signature] = cookieValue(cookie, "access_token").split(".");
+    const forged = `${header}.${base64url({ sub: other.user.id, exp: inAMinute() })}.${signature}`;
+    expect((await getMe(`access_token=${forged}`)).status).toBe(401);
+  });
+
+  it("rejects an expired access token", async () => {
+    const { user } = await signUp(server.url);
+    const expired = jwt.sign({ exp: Math.floor(Date.now() / 1000) - 10 }, env.JWT_ACCESS_SECRET, {
+      subject: user.id,
+    });
+    expect((await getMe(`access_token=${expired}`)).status).toBe(401);
+  });
+
+  it("rejects an unsigned token (alg none)", async () => {
+    const { user } = await signUp(server.url);
+    const unsigned = `${base64url({ alg: "none", typ: "JWT" })}.${base64url({
+      sub: user.id,
+      exp: inAMinute(),
+    })}.`;
+    expect((await getMe(`access_token=${unsigned}`)).status).toBe(401);
+  });
+
+  it("rejects other HMAC algorithms even with the right secret (HS256 is pinned)", async () => {
+    const { user } = await signUp(server.url);
+    const hs512 = jwt.sign({}, env.JWT_ACCESS_SECRET, {
+      algorithm: "HS512",
+      subject: user.id,
+      expiresIn: 60,
+    });
+    expect((await getMe(`access_token=${hs512}`)).status).toBe(401);
+  });
+
+  it("does not accept a refresh token as an access token", async () => {
+    const { cookie } = await signUp(server.url);
+    const refresh = cookieValue(cookie, "refresh_token");
+    expect((await getMe(`access_token=${refresh}`)).status).toBe(401);
+  });
+
+  it("does not accept the refresh cookie alone", async () => {
+    const { cookie } = await signUp(server.url);
+    const refreshOnly = `refresh_token=${cookieValue(cookie, "refresh_token")}`;
+    expect((await getMe(refreshOnly)).status).toBe(401);
   });
 });

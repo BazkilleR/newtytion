@@ -69,7 +69,7 @@ Drizzle uses `casing: "snake_case"` (in both the client and `drizzle.config.js`)
 
 Jest runs native ES modules: each package's `test` script sets `NODE_OPTIONS=--experimental-vm-modules` and `transform: {}` turns Babel off, so run tests through `pnpm test` (not a bare `jest`). Import `describe` / `it` / `expect` / hooks from `@jest/globals`.
 
-Api tests run against a real Postgres (`TEST_DATABASE_URL`). `apps/api/jest.config.js` points `DATABASE_URL` at it, `test/global-setup.js` migrates once, and `test/setup.js` truncates all tables before **each test**. Files run serially (`maxWorkers: 1`) because they share the database. Helpers:
+Api tests run against a real Postgres (`TEST_DATABASE_URL`). `apps/api/jest.config.js` points `DATABASE_URL` at it, `test/global-setup.js` migrates once, and `test/setup.js` truncates all tables before **each test**. Files run serially (`maxWorkers: 1`) because they share the database. The api has only two kinds of test file: `services/*.service.test.js` (call the service against the DB) and `routes/*.routes.test.js` (real HTTP). Test lib, middleware and app behaviour through one of those (e.g. token checks in `auth.routes.test.js`), not with separate unit test files. Helpers:
 - `test/factories.js` inserts users/foods/exercises directly (pass `userId = null` for global rows), for service tests.
 - `test/http.js` `listen(createApp())` + `test/auth.js` `signUp(baseUrl)` returns the auth cookies as a `cookie` header, for route tests over real HTTP.
 
