@@ -43,13 +43,19 @@ pnpm dev                 # api on :3000, web on http://localhost:5173
 
 ### Demo data
 
+One command, with Docker Desktop running:
+
 ```bash
-pnpm db:seed --demo
+pnpm demo          # setup below, then starts api + web
+pnpm demo:setup    # setup only
 ```
 
-Creates **demo@example.com / demo-password** with ~4 months of weigh-ins,
+It creates `.env` from `.env.example` with random JWT secrets if there is none,
+starts Postgres, applies migrations and runs `pnpm db:seed --demo`, which creates
+**demo@example.com / demo-password** with ~4 months of weigh-ins,
 12 weeks of progressive training and today's meals, so every chart has data.
-Re-running replaces the demo user (and only that user).
+Re-running replaces the demo user (and only that user). The data is dated from
+the day you seed, so run it again on the day of a demo.
 
 Open http://localhost:5173. Next rewrites `/api/*` to the API, so
 the browser only ever sees one origin (no CORS, first-party cookies).
@@ -78,6 +84,7 @@ All in the root `.env`, loaded by `apps/api/src/load-env.js` (dotenv). Variables
 | `pnpm db:generate` | create a migration after editing `apps/api/src/db/schema` |
 | `pnpm db:migrate` | apply pending migrations |
 | `pnpm db:seed` | insert global foods/exercises (`--demo` adds the demo user) |
+| `pnpm demo:setup` / `pnpm demo` | .env + Postgres + migrate + demo seed (`demo` also starts the app) |
 
 ## Project structure
 
