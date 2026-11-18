@@ -72,6 +72,26 @@ describe("api router", () => {
 });
 
 describe("app", () => {
+  it("reports health including the database", async () => {
+    const res = await client(server.url).get("/api/health");
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ status: "ok", db: "ok" });
+  });
+
+  it("rejects malformed JSON with INVALID_JSON", async () => {
+    const res = await fetch(`${server.url}/api/health`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{not json",
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error.code).toBe("INVALID_JSON");
+  });
+
+  it("answers unknown /api routes with 401 before login, so routes aren't leaked", async () => {
+    expect((await fetch(`${server.url}/api/nope`)).status).toBe(401);
+  });
+
   it("answers unknown /api routes with a JSON 404 once logged in", async () => {
     const { cookie } = await signUp(server.url);
     const res = await client(server.url, cookie).delete("/api/goals");

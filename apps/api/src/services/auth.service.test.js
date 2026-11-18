@@ -73,6 +73,18 @@ describe("logIn", () => {
     );
   });
 
+  it("still logs in an account whose password was hashed by Better Auth", async () => {
+    // Made by Better Auth 1.7 for "demo-password", before the switch to JWT.
+    const row = await createUser({
+      passwordHash:
+        "9fb6dabfa397fe87d8290e8d0c86b752:3183705f46b34a9e0b6bd855a35c7a306632855d75519b911d83a7ad5f0532aa24623104e25b8efd643418d9763d09f7bcae5d0cc0902885993132d65644beb7",
+    });
+    expect((await logIn({ email: row.email, password: "demo-password" })).id).toBe(row.id);
+    await expect(logIn({ email: row.email, password: "demo-passw0rd" })).rejects.toMatchObject({
+      status: 401,
+    });
+  });
+
   it("rejects an account whose hash no password matches", async () => {
     const row = await createUser(); // passwordHash: "unusable"
     await expect(logIn({ email: row.email, password: "unusable" })).rejects.toMatchObject({
