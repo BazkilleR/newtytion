@@ -1,4 +1,4 @@
-# Fitness Log
+# Newtytion
 
 Personal web app for logging meals and weight-training workouts.
 

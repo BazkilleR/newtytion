@@ -5,7 +5,7 @@ export function AuthCard({ title, children, footer }) {
     <main className="flex min-h-dvh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <p className="text-sm text-muted-foreground">Fitness Log</p>
+          <p className="text-sm text-muted-foreground">Newtytion</p>
           <CardTitle className="text-xl">{title}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
