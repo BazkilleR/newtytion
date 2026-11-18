@@ -28,7 +28,7 @@ export function AppLayout({ children }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur">
-        <span className="font-semibold">Fitness Log</span>
+        <span className="font-semibold">Newtytion</span>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">{user?.name}</span>
           <Button variant="ghost" size="icon-lg" onClick={handleLogout} aria-label="Log out">

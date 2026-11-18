@@ -1,7 +1,7 @@
 import { AuthProvider } from "@/lib/auth.jsx";
 import "./globals.css";
 
-export const metadata = { title: "Fitness Log" };
+export const metadata = { title: "Newtytion" };
 
 export const viewport = { themeColor: "#0a0a0a", viewportFit: "cover" };
 

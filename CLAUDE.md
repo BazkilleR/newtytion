@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Fitness Log: a personal meals + weight-training tracker. pnpm monorepo (`apps/api`, `apps/web`, `packages/shared`). See `README.md` for setup, env vars and the full API route table.
+Newtytion: a personal meals + weight-training tracker. pnpm monorepo (`apps/api`, `apps/web`, `packages/shared`). See `README.md` for setup, env vars and the full API route table.
 
 **The whole project is plain JavaScript (ES modules).** No TypeScript, no JSDoc type-checking, no `typecheck` script. Runtime shapes are enforced with the Zod schemas in `packages/shared`. Don't add TanStack (Router/Query/Form), SWR or similar: the web app is Next.js (App Router, every page a client component), with its own `useApi` and its own `useForm`. Ask before adding any new dependency.
 
