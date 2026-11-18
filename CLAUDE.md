@@ -19,6 +19,7 @@ pnpm build             # web production build (also catches broken imports)
 pnpm db:generate       # new migration after editing apps/api/src/db/schema
 pnpm db:migrate        # apply migrations
 pnpm db:seed [--demo]  # global foods/exercises; --demo adds demo@example.com / demo-password
+pnpm demo[:setup]      # scripts/setup-demo.js: .env, Postgres, migrate, demo seed (demo also runs dev)
 ```
 
 Single test file or test name:

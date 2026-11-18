@@ -14,7 +14,9 @@
     "test": "pnpm -r test",
     "db:generate": "pnpm --filter @fitness/api db:generate",
     "db:migrate": "pnpm --filter @fitness/api db:migrate",
-    "db:seed": "pnpm --filter @fitness/api db:seed"
+    "db:seed": "pnpm --filter @fitness/api db:seed",
+    "demo:setup": "node scripts/setup-demo.js",
+    "demo": "node scripts/setup-demo.js --start"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15"
